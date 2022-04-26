@@ -1,0 +1,126 @@
+# imports
+from asyncio.windows_events import NULL
+from optparse import Values
+import PySimpleGUI as sg
+import matplotlib.pyplot as plt
+from matplotlib.transforms import Bbox
+from matplotlib import style
+import pandas as pd
+import numpy as np
+import datetime as dt
+
+# used to embed matplot lib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+#####
+
+## Data #################################
+
+# price data
+
+df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
+df = df[['EURUSD=X', 'GBPUSD=X']]
+
+end = dt.datetime.now()  # end date is now
+start = dt.datetime(2005, 1, 1)   # start date  
+
+df = df[start:end]
+df = df.asfreq('D') # changes frequency to daily
+df.index # checks the frequency at bottom of printout
+df = df.fillna(method = 'backfill')  # takes the close rows and fills in missing values back
+df = df.fillna(method = 'ffill')  # takes the close rows and fills in missing values forwards, for some markets operating at different days
+# EURUSD & GBPUSD data is 'df'
+
+# listbox data
+
+# get the name of every column 
+# put into data object that the listbox can read
+assetsList = list(df)
+
+# variable to save selected listbox item to
+assetSelected = ''
+
+###############################################
+
+## main chart ##
+
+# create plot function - matplotlib
+
+def main_plot(df):
+    style.use('dark_background')
+    plt.plot(df)
+    #plt.title("EURUSD") # replace static string with variable when working
+    return plt.gcf() # plt.show()
+
+# function to draw on chart
+
+def draw_main_plot(canvas, figure):
+    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    figure_canvas_agg.draw()
+    figure_canvas_agg.get_tk_widget().pack(side = 'top', fill = 'both', expand = 1)
+    return figure_canvas_agg
+
+
+# application layout
+
+layout = [
+    [sg.Text('top of program')],
+    [sg.Canvas(size = (100, 90), key = ("MAIN_CHART")), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LIST-')],  ## top row
+   # [[sg.Canvas(1)], [sg.Canvas(1)], sg.Text('Statistics here')], ## 
+    [sg.Exit()]
+]
+
+#################
+
+# application starts
+# creates window and calls functions
+
+window = sg.Window("TICKERWATCH", layout, resizable = True, finalize = True, element_justification="center")
+
+
+# this will need to be inside the event of clicking a ticker in the listbox
+#draw_main_plot(window['MAIN_CHART'].TKCanvas, main_plot(df)) # change df to df['variable that holds selected ticker from listbox']
+
+
+
+
+#  the EVENT LOOP
+
+while True:
+    # reads input - event (click), assetSelected(value)
+    event, choice = window.read()
+
+    # if window is closed, break loop
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+
+    
+
+    # if item clicked from listbox
+    if event == '-LIST-':
+
+
+
+
+
+
+        # save the item text to variable(name of a column)
+        assetSelected = choice['-LIST-']
+
+        # when calling the chart place that variable in specified column to display
+        draw_main_plot(window['MAIN_CHART'].TKCanvas, main_plot(df[assetSelected]))
+
+    
+
+window.close()
+
+
+# if event == click list item
+#     if no plot
+#          save variable chosen
+#          create new canvas and plot
+#          remove variable saved
+#      else ( if plot)
+#          save variable chosen
+#          create new plot
+#          remove variable saved
