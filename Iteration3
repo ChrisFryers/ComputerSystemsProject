@@ -1,0 +1,130 @@
+# https://towardsdatascience.com/integrating-pyplot-and-pysimplegui-b68be606b960
+
+
+from typing import List
+import PySimpleGUI as sg
+import numpy as np
+import datetime as dt
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# \\  -------- GET DATA -------- //
+
+def getData():
+
+    # get data
+    df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
+    df = df[['EURUSD=X', 'GBPUSD=X']]
+
+    # specifying period
+    end = dt.datetime.now()  # end date is now
+    start = dt.datetime(2005, 1, 1)   # start date  
+    df = df[start:end]
+    # setting frequency
+    df = df.asfreq('D') # changes frequency to daily
+    #df.index # checks the frequency at bottom of printout
+    
+    # fills NaN's
+    df = df.fillna(method = 'backfill')  # takes the close rows and fills in missing values back
+    df = df.fillna(method = 'ffill')  # takes the close rows and fills in missing values forwards, for some markets operating at different days
+    
+    #returns dataframe
+    return (df)
+
+#get list of assets from dataset
+data = getData()
+assetsList = list(data)
+
+
+# VARS CONSTS:
+_VARS = {'window': False,
+         'fig_agg': False,
+         'pltFig': False}
+
+
+
+# Theme for pyplot
+plt.style.use('Solarize_Light2')
+
+# Helper Functions
+
+
+def draw_figure(canvas, figure):
+    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    figure_canvas_agg.draw()
+    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+    return figure_canvas_agg
+
+
+# \\  -------- PYSIMPLEGUI -------- //
+
+AppFont = 'Any 16'
+sg.theme('black')
+
+# Note the new colors for the canvas and window to match pyplots theme:
+
+layout = [[sg.Canvas(key='figCanvas', background_color='#FDF6E3'), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
+          [sg.Button('Update', font=AppFont), sg.Button('Exit', font=AppFont)]]
+
+          
+_VARS['window'] = sg.Window('Such Window',
+                            layout,
+                            finalize=True,
+                            resizable=True,
+                            location=(100, 100),
+                            element_justification="center",
+                            background_color='#FDF6E3')
+
+# \\  -------- PYSIMPLEGUI -------- //
+
+
+# \\  -------- PYPLOT -------- //
+
+def drawChart():
+    _VARS['pltFig'] = plt.figure()
+    data = getData()
+    plt.plot(data)
+    _VARS['fig_agg'] = draw_figure(
+        _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
+
+
+def updateChart():
+    _VARS['fig_agg'].get_tk_widget().forget()
+    data = getData()
+    # plt.cla()
+    plt.clf()
+    plt.plot(data)
+    _VARS['fig_agg'] = draw_figure(
+       _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
+
+# \\  -------- PYPLOT -------- //
+
+
+drawChart()
+
+
+
+
+
+# MAIN LOOP
+while True:
+    event, value = _VARS['window'].read(timeout=200)
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+    if event == '-LISTBOX_CLICK-':
+       assetSelected = value['-LISTBOX_CLICK-']
+       _VARS['fig_agg'].get_tk_widget().forget()
+       data = getData()
+       # plt.cla()
+       plt.clf()
+       plt.plot(data[assetSelected])
+       _VARS['fig_agg'] = draw_figure(
+          _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
+
+
+
+
+
+
+_VARS['window'].close()
