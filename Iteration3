@@ -9,6 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+# cyclical imports
+from statsmodels.tsa.filters.hp_filter import hpfilter
+
 # \\  -------- GET DATA -------- //
 
 # create function importData()
@@ -42,10 +45,35 @@ def getAssetList():
 
 assetsList = getAssetList()
 
+# \\  -------- CYCLICAL ANALYSIS -------- //
+
+def get_cyclical_analysis():
+    
+    # getting the data
+    df = getData()
+
+    #()  asset symbol selected from list
+    asset = df[assetSelected]
+
+    asset_cycle,asset_trend = hpfilter(asset, lamb=1600*30**4)
+
+    return asset_cycle
+
+
+
+
+
+
+
+
 # VARS CONSTS:
 _VARS = {'window': False,
          'fig_agg': False,
-         'pltFig': False}
+         'pltFig': False, 
+
+         'figg_agg_cycle': False,
+         'pltFig_cycle': False
+         }
 
 # \\  -------- PYSIMPLEGUI THEME -------- //
 
@@ -58,7 +86,7 @@ sg.theme('black')
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
 layout = [[sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
-          [sg.Button('Update', font=AppFont), sg.Button('Exit', font=AppFont)]]
+          [sg.Canvas(key='figCanvas_Cycle'), sg.Button('Update', font=AppFont), sg.Button('Exit', font=AppFont)]]
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
@@ -73,7 +101,9 @@ _VARS['window'] = sg.Window('Such Window',
 
 # \\  -------- PYSIMPLEGUI -------- //
 
-# \\  -------- PYPLOT -------- //
+# \\  -------- PYPLOTS -------- //
+
+# \\  -------- MAIN -------- //
 
 def draw_figure(canvas, figure):
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
@@ -85,6 +115,7 @@ def drawMainChart():
     _VARS['pltFig'] = plt.figure()
     data = getData()
     plt.plot(data['EURUSD=X'])
+    plt.title('EURUSD=X')
     _VARS['fig_agg'] = draw_figure(
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
@@ -98,11 +129,40 @@ def updateMainChart():
     _VARS['fig_agg'] = draw_figure(
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
+
+# \\  -------- CYCLICAL -------- //
+
+def draw_figure_cyclical(canvas_cycle, figure_cycle):
+    figure_canvas_agg_cycle = FigureCanvasTkAgg(figure_cycle, canvas_cycle)
+    figure_canvas_agg_cycle.draw()
+    figure_canvas_agg_cycle.get_tk_widget().pack(side='top', fill='both', expand=1)
+    return figure_canvas_agg_cycle
+
+def drawCycleChart():
+    _VARS['pltFig_cycle'] = plt.figure()
+    data = getData()
+    plt.plot(data['EURUSD=X'])
+    plt.title('Cyclical Forecast')
+    _VARS['fig_agg_cycle'] = draw_figure_cyclical(
+        _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
+
+def updateCycleChart():
+    _VARS['fig_agg_cycle'].get_tk_widget().forget()
+    data = get_cyclical_analysis()
+    # plt.cla()
+    plt.clf()
+    plt.plot(data)
+    plt.title('Cyclical Forecast')
+    _VARS['fig_agg_cycle'] = draw_figure_cyclical(
+        _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
+
+
 # \\  -------- PYPLOT -------- //
 
 drawMainChart()
+drawCycleChart()
 
-# MAIN LOOP
+# \\  -------- MAIN LOOP -------- //
 while True:
      
     event, value = _VARS['window'].read(timeout=200)
@@ -118,5 +178,7 @@ while True:
        assetSelected = value['-LISTBOX_CLICK-']
        #calls update chart function
        updateMainChart()
+       updateCycleChart()
+    
 
 _VARS['window'].close()
