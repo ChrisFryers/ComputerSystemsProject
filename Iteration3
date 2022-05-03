@@ -11,6 +11,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # \\  -------- GET DATA -------- //
 
+# create function importData()
+
 def getData():
 
     # get data
@@ -32,99 +34,89 @@ def getData():
     #returns dataframe
     return (df)
 
-#get list of assets from dataset
-data = getData()
-assetsList = list(data)
+def getAssetList():
+    #get list of assets from dataset
+    data = getData()
+    assetsList = list(data)
+    return assetsList
 
+assetsList = getAssetList()
 
 # VARS CONSTS:
 _VARS = {'window': False,
          'fig_agg': False,
          'pltFig': False}
 
-
+# \\  -------- PYSIMPLEGUI THEME -------- //
 
 # Theme for pyplot
-plt.style.use('Solarize_Light2')
-
-# Helper Functions
-
-
-def draw_figure(canvas, figure):
-    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
-    figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
-    return figure_canvas_agg
-
-
-# \\  -------- PYSIMPLEGUI -------- //
+plt.style.use('dark_background')
 
 AppFont = 'Any 16'
 sg.theme('black')
 
-# Note the new colors for the canvas and window to match pyplots theme:
+# \\  -------- ELEMENTS IN LAYOUT -------- //
 
-layout = [[sg.Canvas(key='figCanvas', background_color='#FDF6E3'), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
+layout = [[sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
           [sg.Button('Update', font=AppFont), sg.Button('Exit', font=AppFont)]]
-
           
+# \\  -------- APPLICATION WINDOW  -------- //
+
 _VARS['window'] = sg.Window('Such Window',
                             layout,
+                            size = (1000, 500),
                             finalize=True,
                             resizable=True,
                             location=(100, 100),
                             element_justification="center",
-                            background_color='#FDF6E3')
+                            background_color='black')
 
 # \\  -------- PYSIMPLEGUI -------- //
 
-
 # \\  -------- PYPLOT -------- //
 
-def drawChart():
+def draw_figure(canvas, figure):
+    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    figure_canvas_agg.draw()
+    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=5)
+    return figure_canvas_agg
+
+def drawMainChart():
     _VARS['pltFig'] = plt.figure()
     data = getData()
-    plt.plot(data)
+    plt.plot(data['EURUSD=X'])
     _VARS['fig_agg'] = draw_figure(
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
-
-def updateChart():
+def updateMainChart():
     _VARS['fig_agg'].get_tk_widget().forget()
     data = getData()
     # plt.cla()
     plt.clf()
-    plt.plot(data)
+    plt.plot(data[assetSelected])
+    plt.title(assetSelected)
     _VARS['fig_agg'] = draw_figure(
-       _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
+        _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
 # \\  -------- PYPLOT -------- //
 
-
-drawChart()
-
-
-
-
+drawMainChart()
 
 # MAIN LOOP
 while True:
+     
     event, value = _VARS['window'].read(timeout=200)
+
+    # if window closed or exited - break
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
+
+    # if listbox item is selected:
     if event == '-LISTBOX_CLICK-':
+
+       # saves listbox item selected
        assetSelected = value['-LISTBOX_CLICK-']
-       _VARS['fig_agg'].get_tk_widget().forget()
-       data = getData()
-       # plt.cla()
-       plt.clf()
-       plt.plot(data[assetSelected])
-       _VARS['fig_agg'] = draw_figure(
-          _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
-
-
-
-
-
+       #calls update chart function
+       updateMainChart()
 
 _VARS['window'].close()
