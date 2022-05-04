@@ -16,7 +16,7 @@ import datetime as dt
 
 
 
-
+# \\  -------- GET DATA -------- //
 # get data
 df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
 df = df[['EURUSD=X', 'GBPUSD=X']]
@@ -36,7 +36,9 @@ df = df.fillna(method = 'ffill')  # takes the close rows and fills in missing va
 
 
 
-# creating dataframe for predictions
+# creating empty dataframe for predictions
+
+# \\  -------- CREATING EMPTY DATAFRAME FOR PREDICTIONS -------- //
 
 # creating the date range
 forecast_start = dt.datetime.now()  # end date is now
@@ -51,13 +53,14 @@ df_forecast = pd.DataFrame(index = dateRange)
 
 
 
-# create variable for number of columns Num_of_cols = len(list(df))
+
+# \\  -------- START LOOP TO ITER THROUGH DATAFRMAE COLUMNS -------- //
 
 
-## start loop to loop around column names and make predictions for everyone
+## start to loop around dataframe for every column
 for column_name in df:
 
-    #assetName = df[column_name]
+    #column_name = name of column
 
     # Indexing Batches
     df_train = df.sort_values(by=['Date']).copy()
@@ -85,10 +88,8 @@ for column_name in df:
     
         # Convert the data to numpy values
         np_filter_unscaled = np.array(df_filter)
-        #np_filter_unscaled = np.reshape(np_unscaled, (df_filter.shape[0], -1))
-        #print(np_filter_unscaled.shape)
 
-        np_c_unscaled = np.array(df).reshape(-1, 1)
+        np_c_unscaled = np.array(df[column_name]).reshape(-1, 1)                            # change from df to df[column_name]
     
         return np_filter_unscaled, np_c_unscaled
     
@@ -106,7 +107,7 @@ for column_name in df:
 
 
 
-
+# \\  -------- SETTING SEQUENCE LENGTHS AND TEST AND TRAIN DATA -------- //
 
     # Set the input_sequence_length length - this is the timeframe used to make a single prediction - experiment witht his number to find optimal accuracy
     input_sequence_length = 50
@@ -123,10 +124,6 @@ for column_name in df:
     # Create the training and test data
     train_data = np_scaled[0:train_data_length, :]
     test_data = np_scaled[train_data_length - input_sequence_length:, :]
-
-
-
-
 
 
     # The RNN needs data with the format of [samples, time steps, features]
@@ -148,29 +145,10 @@ for column_name in df:
     x_test, y_test = partition_dataset(input_sequence_length, output_sequence_length, test_data)
 
 
-    # Print the shapes: the result is: (rows, training_sequence, features) (prediction value, )
-    #print(x_train.shape, y_train.shape)
-    #print(x_test.shape, y_test.shape)
 
+# \\  -------- CREATING MTHE RNN LSTM MODEL -------- //
 
-
-
-
-
-
-    # Validate that the prediction value and the input match up
-    # The last close price of the second input sample should equal the first prediction value
-    # print(x_train[1][input_sequence_length-1][index_Close])
-    # print(y_train[0])
-
-
-
-
-
-
-
-
-    # prepare the neural network archiecture and train th emulti-output regression model
+    # prepare the neural network archiecture and train the multi-output regression model
 
     # Configure the neural network model
     model = Sequential()
@@ -178,7 +156,6 @@ for column_name in df:
 
     # Model with n_neurons = inputshape Timestamps, each with x_train.shape[2] variables
     n_input_neurons = x_train.shape[1] * x_train.shape[2]
-    print(n_input_neurons, x_train.shape[1], x_train.shape[2])
     model.add(LSTM(n_input_neurons, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2]))) 
     model.add(LSTM(n_input_neurons, return_sequences=False))
     model.add(Dense(20))
@@ -190,7 +167,7 @@ for column_name in df:
 
 
 
-
+# \\  -------- TRAINING THE MODEL -------- //
 
 
     # Training the model
@@ -208,11 +185,7 @@ for column_name in df:
 
 
 
-
-
-
-
-
+# \\  -------- TRANSFORMING (UNSCALING) THE DATA BACK -------- //
 
     # Get the predicted values
     y_pred_scaled = model.predict(x_test)
@@ -222,37 +195,9 @@ for column_name in df:
     y_test_unscaled = scaler_pred.inverse_transform(y_test).reshape(-1, output_sequence_length)
     y_test_unscaled.shape
 
-    # Mean Absolute Error (MAE)
-    MAE = mean_absolute_error(y_test_unscaled, y_pred)
-    #print(f'Median Absolute Error (MAE): {np.round(MAE, 2)}')
-
-    # Mean Absolute Percentage Error (MAPE)
-    MAPE = np.mean((np.abs(np.subtract(y_test_unscaled, y_pred)/ y_test_unscaled))) * 100
-    #print(f'Mean Absolute Percentage Error (MAPE): {np.round(MAPE, 2)} %')
-
-    # Median Absolute Percentage Error (MDAPE)
-    MDAPE = np.median((np.abs(np.subtract(y_test_unscaled, y_pred)/ y_test_unscaled)) ) * 100
-    #print(f'Median Absolute Percentage Error (MDAPE): {np.round(MDAPE, 2)} %')
-
-
-
-
-
-
-
-
-
-
 
     x_test_unscaled = scaler_pred.inverse_transform(np.array(pd.DataFrame(x_test[0])[index_Close]).reshape(-1, 1)) 
     df_test = pd.DataFrame(x_test_unscaled)
-
-
-
-
-
-
-
 
 
 
@@ -264,25 +209,20 @@ for column_name in df:
     y_pred_scaled = model.predict(x_test_new)
     y_pred = scaler_pred.inverse_transform(y_pred_scaled)
 
-    # plot the predictions
-    #plot_new_multi_forecast(0, 0, x_test_new, y_pred)
+ 
+ 
 
+# \\  -------- ADDING FORECASTS TO THE FORECAST DATAFRAME -------- //
 
-    # code to put predictions in dataframe
+   # transforming predictions to put in dataframe
     y_pred = np.array(y_pred)
-
     y_pred_l = np.ndarray.tolist(y_pred[0])
 
-    #print(type(y_pred_l))
-    #print(y_pred_l)
 
-
-
-    # adding the forecast to the forecast dataframe
+    # putting prediction in dataframe under its column name
     df_forecast[column_name] = y_pred_l
-    #plt.show()
-    #print(df_forecast)
 
+    # printing the columns as they are output   # not needed for porgram
     plt.plot(df_forecast[column_name])
     plt.title(column_name)
     plt.show()
