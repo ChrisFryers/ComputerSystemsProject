@@ -51,6 +51,38 @@ def getData():
     #returns dataframe
     return (df)
 
+def get_Corr_Data():
+
+    # get data
+    df = getData()
+    
+    # create correlation matrix
+    df_corr = df.corr()
+
+    #  sort values by dollar index
+    df_corr = df_corr.sort_values(by = 'EURUSD=X', ascending = False)
+    
+
+    # adjusts size of the plot
+    fig, ax = plt.subplots(figsize=(11, 11))
+
+    # create correlation 
+    corrplot = sns.heatmap(
+    data = df_corr,
+    cmap = 'RdYlGn_r',
+    square=True,    
+    annot = True,
+    fmt='.2g',  # round up to 2 decimal points
+    annot_kws = {"fontsize": 8}
+    )
+
+    plt.title('Correlation Plot')
+    plt.show()
+
+
+
+
+
 def getAssetList():
     #get list of assets from dataset
     data = getData()
@@ -290,7 +322,7 @@ sg.theme('black')
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
 layout = [[sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
-          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.Button('Update', font=AppFont), sg.Button('Exit', font=AppFont)]]
+          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.Button('Correlations', font=AppFont), sg.Button('Exit', font=AppFont)]]
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
@@ -409,6 +441,10 @@ while True:
        updateMainChart()
        
        updateForecastChart()
+
+    if event == 'Correlations':
+
+        get_Corr_Data()
     
 
 _VARS['window'].close()
