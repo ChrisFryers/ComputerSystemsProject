@@ -212,8 +212,8 @@ def get_forecast_analysis():
 
 
         # Training the model
-        epochs = 13 # set to 13 for optimal
-        batch_size = 12 # set to 12 as optimal
+        epochs = 1 # set to 13 for optimal
+        batch_size = 150 # set to 12 as optimal
         early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
         history = model.fit(x_train, y_train, 
                             batch_size=batch_size, 
@@ -316,7 +316,7 @@ def draw_figure(canvas, figure):
 # \\  -------- MAIN -------- //
 
 def drawMainChart():
-    _VARS['pltFig'] = plt.figure()
+    _VARS['pltFig'] = plt.figure(num = 1)
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('EURUSD=X')
@@ -324,55 +324,62 @@ def drawMainChart():
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
 def updateMainChart():
-    _VARS['fig_agg'].get_tk_widget().forget()
+
+    #getting data to display
     data = getData()
-    # plt.cla()
-    plt.clf()
-    plt.plot(data[assetSelected])
-    plt.title(assetSelected)
-    _VARS['fig_agg'] = draw_figure(
-        _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
+
+    # updating chart
+    plt.figure(num = 1)           # tell the program we selecting figure 1 to update
+    plt.clf()                     # clearing information on chart 
+    plt.plot(data[assetSelected]) # plotting new selected data
+    plt.title(assetSelected)      # adding title from seleected data
+    plt.draw()                    # drawing the information on the chart
 
 
 # \\  -------- CYCLICAL -------- //
 
+# draw cycle chart function
 def drawCycleChart():
-    _VARS['pltFig_cycle'] = plt.figure()
+    _VARS['pltFig_cycle'] = plt.figure(num = 2)
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('Cyclical Pattern')
     _VARS['fig_agg_cycle'] = draw_figure(
         _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
 
+# update cycle chart function
 def updateCycleChart():
-    _VARS['fig_agg_cycle'].get_tk_widget().forget()
+
+    #getting data to display
     asset_cycle = get_cyclical_analysis()
-    # plt.cla()
-    plt.clf()
-    plt.plot(asset_cycle)
-    plt.title('Cyclical Pattern')
-    _VARS['fig_agg_cycle'] = draw_figure(
-        _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
+    
+    # updating chart
+    plt.figure(num = 2)           # tell the program we selecting figure 2 to update
+    plt.clf()                     # clearing information on chart
+    plt.plot(asset_cycle)         # plotting new selected data
+    plt.title('Cyclical Pattern') # adding title from seleected data
+    plt.draw()                    # drawing the information on the chart
 
 
 # \\  -------- FORECAST -------- //
 
+# draw chart function
 def drawForecastChart():
-    _VARS['pltFig_forecast'] = plt.figure()
+    _VARS['pltFig_forecast'] = plt.figure(num = 3)
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('Forecast')
     _VARS['fig_agg_forecast'] = draw_figure(
         _VARS['window']['figCanvas_Forecast'].TKCanvas, _VARS['pltFig_forecast'])
 
-def updateForecastChart():
-    _VARS['fig_agg_forecast'].get_tk_widget().forget()
-    # plt.cla()
-    plt.clf()
-    plt.plot(df_forecast[assetSelected])
-    plt.title('Forecast')
-    _VARS['fig_agg_forecast'] = draw_figure(
-        _VARS['window']['figCanvas_Forecast'].TKCanvas, _VARS['pltFig_forecast'])
+# update chart function
+def updateForecastChart(): 
+
+    plt.figure(num = 3)                  # tell the program we selecting figure 2 to update
+    plt.clf()                            # clearing the chart
+    plt.plot(df_forecast[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
+    plt.title('Forecast')                # adding a title
+    plt.draw()                           # drawing the information on the chart
 
 
 # \\  -------- PYPLOT -------- //
