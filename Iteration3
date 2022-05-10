@@ -52,22 +52,32 @@ def getData():
     #returns dataframe
     return (df)
 
-def get_Corr_Data():
-
-    # get data
-    df = getData()
+# function for correlation Matrix
+def get_Corr_Matrix():
     
-    # create correlation matrix
-    df_corr = df.corr()
+    # create layout and window
+    layout2 = [[sg.Text('CORRERLATION MATRIX')],
+              [sg.Canvas(key='figCanvas_Corr', expand_x = True, expand_y = True)]]
 
-    #  sort values by dollar index
-    df_corr = df_corr.sort_values(by = 'EURUSD=X', ascending = False)
-    
-    # identify figure
-    plt.figure(num = 'Correlation Figure', figsize = (11, 11))
+    _VARS['window2'] = sg.Window('CORRELATION MATRIX',
+                            layout2,
+                            size = (1000, 500),
+                            finalize=True,
+                            resizable=True,
+                            location=(100, 100),
+                            element_justification="center",
+                            background_color='black')
 
-    # adjusts size of the plot
-    #plt.subplots(figsize=(11, 11))
+    # Get data, calculate correlations and sort values
+    df = getData()                                                    # get dataframe
+    df_corr = df.corr()                                               # calculate and create correlation df
+    df_corr = df_corr.sort_values(by = 'EURUSD=X', ascending = False) # sort values by dollar index
+
+    # add matplot figure to pysimplefigure
+    _VARS['pltFig_corr'] = plt.figure(num = 4)
+
+    plt.figure(num = 4)  # select figure to append
+    plt.clf()            # clear selected figure
 
     # create correlation 
     corrplot = sns.heatmap(
@@ -78,13 +88,17 @@ def get_Corr_Data():
         fmt='.2g',                   # round up to 2 decimal points
         annot_kws = {"fontsize": 8}  # font size of the correlation numbers on the boxes
     )
+    # identify figure
+    plt.figure(num = 'Correlation Figure', figsize = (11, 11)) # set figure size
+    plt.title('Correlation Plot')                              # figure title
+    plt.figure(num = 4)                                        # select figure to append
+    plt.draw()                                                 # draw selected figure
 
-    plt.title('Correlation Plot')
-    plt.close(fig = 1)
-    plt.close(fig = 2)
-    plt.close(fig = 3)
-    plt.show()
+    # draw figure to canvas
+    _VARS['fig_agg_corr'] = draw_figure(
+        _VARS['window2']['figCanvas_Corr'].TKCanvas, _VARS['pltFig_corr'])
 
+# function to get list of assets from dataframe
 def getAssetList():
     #get list of assets from dataset
     data = getData()
@@ -94,7 +108,7 @@ def getAssetList():
 assetsList = getAssetList()
 
 # \\  -------- CYCLICAL ANALYSIS -------- //
-
+# function to get cyclcial analysis data
 def get_cyclical_analysis():
     
     # getting the data
@@ -107,7 +121,7 @@ def get_cyclical_analysis():
 
     return asset_cycle
 
-
+# function to produce forecast prediction
 def get_forecast_analysis():
 
     # getting the data
@@ -311,6 +325,10 @@ _VARS = {'window': False,
          'figg_agg_forecast': False,
          'pltFig_forecast': False,
 
+         'window2': False,
+         'figg_agg_corr': False,
+         'pltFig_corr': False,
+
          }
 
 # \\  -------- PYSIMPLEGUI THEME -------- //
@@ -330,7 +348,7 @@ layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST',
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
-_VARS['window'] = sg.Window('Such Window',
+_VARS['window'] = sg.Window('TICKERWATCH',
                             layout,
                             size = (1000, 500),
                             finalize=True,
@@ -446,9 +464,13 @@ while True:
        
        updateForecastChart()
 
+    # if correlation button is clicked
     if event == 'Correlations':
            
-        get_Corr_Data()
+        # calls correlation function
+        get_Corr_Matrix()
+
+    
     
 
 _VARS['window'].close()
