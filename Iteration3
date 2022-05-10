@@ -27,6 +27,9 @@ from keras.callbacks import EarlyStopping # EarlyStopping during model training
 from sklearn.preprocessing import RobustScaler, MinMaxScaler # This Scaler removes the median and scales the data according to the quantile range to normalize the price data 
 import seaborn as sns
 
+# for outliers in data cleaning
+from scipy import stats
+
 # \\  -------- GET DATA -------- //
 
 # create function importData()
@@ -37,6 +40,10 @@ def getData():
     df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
     df = df[['EURUSD=X', 'GBPUSD=X']]
 
+    #remove outliers
+    df = df[(np.abs(stats.zscore(df)) < 20).all(axis=1)]
+
+
     # specifying period
     end = dt.datetime.now()  # end date is now
     start = dt.datetime(2005, 1, 1)   # start date  
@@ -45,9 +52,8 @@ def getData():
     df = df.asfreq('D') # changes frequency to daily
     #df.index # checks the frequency at bottom of printout
     
-    # fills NaN's
-    df = df.fillna(method = 'backfill')  # takes the close rows and fills in missing values back
-    df = df.fillna(method = 'ffill')  # takes the close rows and fills in missing values forwards, for some markets operating at different days
+    # fill missing data using interpolate
+    df = df.interpolate(method = 'linear')
     
     #returns dataframe
     return (df)
@@ -348,7 +354,7 @@ layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST',
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
-_VARS['window'] = sg.Window('TICKERWATCH',
+_VARS['window'] = sg.Window('TickerWatch',
                             layout,
                             size = (1000, 500),
                             finalize=True,
