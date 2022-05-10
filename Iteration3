@@ -4,6 +4,7 @@
 
 from ast import Return
 from typing import List
+from unicodedata import name
 import PySimpleGUI as sg
 import numpy as np
 import datetime as dt
@@ -62,26 +63,27 @@ def get_Corr_Data():
     #  sort values by dollar index
     df_corr = df_corr.sort_values(by = 'EURUSD=X', ascending = False)
     
+    # identify figure
+    plt.figure(num = 'Correlation Figure', figsize = (11, 11))
 
     # adjusts size of the plot
-    fig, ax = plt.subplots(figsize=(11, 11))
+    #plt.subplots(figsize=(11, 11))
 
     # create correlation 
     corrplot = sns.heatmap(
-    data = df_corr,
-    cmap = 'RdYlGn_r',
-    square=True,    
-    annot = True,
-    fmt='.2g',  # round up to 2 decimal points
-    annot_kws = {"fontsize": 8}
+        data = df_corr,              # using the correlation dataframe
+        cmap = 'RdYlGn_r',           # green and red colours
+        square=True,                 # style of heatmap
+        annot = True,                # draw number correlations on squares
+        fmt='.2g',                   # round up to 2 decimal points
+        annot_kws = {"fontsize": 8}  # font size of the correlation numbers on the boxes
     )
 
     plt.title('Correlation Plot')
+    plt.close(fig = 1)
+    plt.close(fig = 2)
+    plt.close(fig = 3)
     plt.show()
-
-
-
-
 
 def getAssetList():
     #get list of assets from dataset
@@ -321,8 +323,10 @@ sg.theme('black')
 
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
-layout = [[sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
-          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.Button('Correlations', font=AppFont), sg.Button('Exit', font=AppFont)]]
+layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST', justification = 'right')],
+          [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
+          [sg.HorizontalSeparator()],
+          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(),sg.Button('Exit', font=AppFont)]]
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
@@ -375,7 +379,7 @@ def drawCycleChart():
     _VARS['pltFig_cycle'] = plt.figure(num = 2)
     data = getData()
     plt.plot(data['EURUSD=X'])
-    plt.title('Cyclical Pattern')
+    plt.title('CYCLICAL TENDANCY')
     _VARS['fig_agg_cycle'] = draw_figure(
         _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
 
@@ -389,7 +393,7 @@ def updateCycleChart():
     plt.figure(num = 2)           # tell the program we selecting figure 2 to update
     plt.clf()                     # clearing information on chart
     plt.plot(asset_cycle)         # plotting new selected data
-    plt.title('Cyclical Pattern') # adding title from seleected data
+    plt.title('CYCLICAL TENDANCY') # adding title from seleected data
     plt.draw()                    # drawing the information on the chart
 
 
@@ -400,7 +404,7 @@ def drawForecastChart():
     _VARS['pltFig_forecast'] = plt.figure(num = 3)
     data = getData()
     plt.plot(data['EURUSD=X'])
-    plt.title('Forecast')
+    plt.title('FORECAST')
     _VARS['fig_agg_forecast'] = draw_figure(
         _VARS['window']['figCanvas_Forecast'].TKCanvas, _VARS['pltFig_forecast'])
 
@@ -410,7 +414,7 @@ def updateForecastChart():
     plt.figure(num = 3)                  # tell the program we selecting figure 2 to update
     plt.clf()                            # clearing the chart
     plt.plot(df_forecast[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
-    plt.title('Forecast')                # adding a title
+    plt.title('FORECAST')                # adding a title
     plt.draw()                           # drawing the information on the chart
 
 
@@ -443,7 +447,7 @@ while True:
        updateForecastChart()
 
     if event == 'Correlations':
-
+           
         get_Corr_Data()
     
 
