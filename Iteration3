@@ -334,6 +334,9 @@ _VARS = {'window': False,
          'fig_agg_hist': False,
          'pltFig_hist': False,
 
+         'fig_agg_roc': False,
+         'pltFig_roc': False,
+
          'window2': False,
          'figg_agg_corr': False,
          'pltFig_corr': False,
@@ -353,7 +356,7 @@ sg.theme('black')
 layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST', justification = 'right')],
           [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
           [sg.HorizontalSeparator()],
-          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(), sg.Canvas(key='figCanvas_Hist')]]
+          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(), sg.Canvas(key='figCanvas_Hist'), sg.Canvas(key='figCanvas_Roc')]]
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
@@ -397,7 +400,6 @@ def updateMainChart():
     plt.plot(data[assetSelected]) # plotting new selected data
     plt.title(assetSelected)      # adding title from seleected data
     plt.draw()                    # drawing the information on the chart
-
 
 # \\  -------- CYCLICAL -------- //
 
@@ -444,6 +446,8 @@ def updateForecastChart():
     plt.title('FORECAST')                # adding a title
     plt.draw()                           # drawing the information on the chart
 
+# \\  -------- HISTOGRAM -------- //
+
 def drawHistChart():
     _VARS['pltFig_hist'] = plt.figure(num = 5)
     data = getData()
@@ -464,11 +468,35 @@ def updateHistChart():
     plt.title('HISTOGRAM')                # adding a title
     plt.draw()  
 
+# \\  -------- RATE OF CHANGE -------- //
+
+def drawRocChart():
+    _VARS['pltFig_roc'] = plt.figure(num = 6)
+    data = getData()
+    data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
+    plt.plot(data_ROC['EURUSD=X'])
+    plt.title('RATE OF CHANGE')
+    _VARS['fig_agg_roc'] = draw_figure(
+        _VARS['window']['figCanvas_Roc'].TKCanvas, _VARS['pltFig_roc'])
+
+def updateRocChart(): 
+
+    data = getData()
+    data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
+
+    plt.figure(num = 6)                  # tell the program we selecting figure 2 to update
+    plt.clf()                            # clearing the chart
+    plt.plot(data_ROC[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
+    plt.title('RATE OF CHANGE')                # adding a title
+    plt.draw()  
+
+
 
 # \\  -------- PYPLOT -------- //
 drawCycleChart()
 drawMainChart()
 drawHistChart()
+drawRocChart()
 
 df_forecast = get_forecast_analysis() # only call this once on start up as it is intensive - later improve saving file if not made already today etc
 drawForecastChart()
@@ -495,6 +523,8 @@ while True:
        updateForecastChart()
 
        updateHistChart()
+
+       updateRocChart()
 
     # if correlation button is clicked
     if event == 'Correlations':
