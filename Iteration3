@@ -354,7 +354,7 @@ sg.theme('black')
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
 layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST', justification = 'right')],
-          [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
+          [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5)), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
           [sg.HorizontalSeparator()],
           [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(), sg.Canvas(key='figCanvas_Hist'), sg.Canvas(key='figCanvas_Roc')]]
           
@@ -490,6 +490,33 @@ def updateRocChart():
     plt.title('RATE OF CHANGE')                # adding a title
     plt.draw()  
 
+# \\  -------- UPDATING DISTRIBUTION CHARTS PERIOD PARAMETER BASED ON TIMEFRAME SLIDER -------- //
+
+def updateDistCharts():
+
+
+    data = getData()
+    data_ROC = data.pct_change(periods = period_selected)  # change period number to selected timeframe eventually
+
+    plt.figure(num = 5)                  # tell the program we selecting figure 2 to update
+    plt.clf()                            # clearing the chart
+    plt.hist(data_ROC[assetSelected], bins = 100) # accessing the dataframe of forecasted data and picking the column of the selected object
+    plt.title('HISTOGRAM')                # adding a title
+    plt.draw()  
+
+    plt.figure(num = 6)                  # tell the program we selecting figure 2 to update
+    plt.clf()                            # clearing the chart
+    plt.plot(data_ROC[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
+    plt.title('RATE OF CHANGE')                # adding a title
+    plt.draw() 
+
+    data_resampled = data.iloc[::period_selected, :] # skip every #th row in the dataframe
+    # main chart
+    plt.figure(num = 1)           # tell the program we selecting figure 1 to update
+    plt.clf()                     # clearing information on chart 
+    plt.plot(data_resampled[assetSelected]) # plotting new selected data
+    plt.title(assetSelected)      # adding title from seleected data
+    plt.draw()                    # drawing the information on the chart 
 
 
 # \\  -------- PYPLOT -------- //
@@ -531,6 +558,24 @@ while True:
            
         # calls correlation function
         get_Corr_Matrix()
+
+    if event == 'TIMEFRAME_ADJUST':
+
+        try:
+            
+            assetSelected
+
+        except:
+
+            sg.Popup('Please Select and Asset From the ListBox')
+        
+        else:
+
+            period_selected = int(value['TIMEFRAME_ADJUST'])
+
+            
+
+            updateDistCharts()
 
     
     
