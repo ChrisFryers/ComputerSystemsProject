@@ -331,6 +331,9 @@ _VARS = {'window': False,
          'figg_agg_forecast': False,
          'pltFig_forecast': False,
 
+         'fig_agg_hist': False,
+         'pltFig_hist': False,
+
          'window2': False,
          'figg_agg_corr': False,
          'pltFig_corr': False,
@@ -350,7 +353,7 @@ sg.theme('black')
 layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST', justification = 'right')],
           [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
           [sg.HorizontalSeparator()],
-          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(),sg.Button('Exit', font=AppFont)]]
+          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(), sg.Canvas(key='figCanvas_Hist')]]
           
 # \\  -------- APPLICATION WINDOW  -------- //
 
@@ -441,10 +444,31 @@ def updateForecastChart():
     plt.title('FORECAST')                # adding a title
     plt.draw()                           # drawing the information on the chart
 
+def drawHistChart():
+    _VARS['pltFig_hist'] = plt.figure(num = 5)
+    data = getData()
+    data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
+    plt.hist(data_ROC['EURUSD=X'], bins = 100)
+    plt.title('HISTOGRAM')
+    _VARS['fig_agg_hist'] = draw_figure(
+        _VARS['window']['figCanvas_Hist'].TKCanvas, _VARS['pltFig_hist'])
+
+def updateHistChart(): 
+
+    data = getData()
+    data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
+
+    plt.figure(num = 5)                  # tell the program we selecting figure 2 to update
+    plt.clf()                            # clearing the chart
+    plt.hist(data_ROC[assetSelected], bins = 100) # accessing the dataframe of forecasted data and picking the column of the selected object
+    plt.title('HISTOGRAM')                # adding a title
+    plt.draw()  
+
 
 # \\  -------- PYPLOT -------- //
 drawCycleChart()
 drawMainChart()
+drawHistChart()
 
 df_forecast = get_forecast_analysis() # only call this once on start up as it is intensive - later improve saving file if not made already today etc
 drawForecastChart()
@@ -469,6 +493,8 @@ while True:
        updateMainChart()
        
        updateForecastChart()
+
+       updateHistChart()
 
     # if correlation button is clicked
     if event == 'Correlations':
