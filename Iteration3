@@ -1,5 +1,3 @@
-# https://towardsdatascience.com/integrating-pyplot-and-pysimplegui-b68be606b960
-
 # \\  -------- IMPORTS -------- //
 
 from ast import Return
@@ -30,33 +28,63 @@ import seaborn as sns
 # for outliers in data cleaning
 from scipy import stats
 
+# Data API
+from pandas_datareader import data as pdr
+import yfinance as yfin
+yfin.pdr_override()
+
 # \\  -------- GET DATA -------- //
 
-# create function importData()
+def importData():
+
+    # specify date range for analysis
+    end = dt.datetime.now()  # end date is now
+    start = dt.datetime(2000, 1, 1)   # start date  
+
+    # ticker data to import - used yahoofinance as reference to ticker format
+    tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
+
+    # pandas datareader
+    df = pdr.get_data_yahoo(tickerlist, start, end)
+
+
+
+
+    return df
+
+# call importData function first on loading (only once) and save in dataframe for getData function to call dataframe
+dataFrame = importData()
 
 def getData():
 
-    # get data
-    df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
+    # get data generated from importData()
+    df = dataFrame
+
+    # clean data section
+    df = df['Close']  # takes the close rows
+    
+    df = df.fillna(method = 'backfill')  # takes the close rows and fills in missing values back
+    df = df.fillna(method = 'ffill')  # takes the close rows and fills in missing values forwards, for some markets operating at different days
+
+    df = df.asfreq('D') # changes frequency to daily
+
+    df = df.interpolate(method = 'linear') # fill gaps to the correct frequency
+
+    df = df[(np.abs(stats.zscore(df)) < 10).all(axis=1)] # remove any extreme outliers
+
+
+
+    
+    #df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
     df = df[['EURUSD=X', 'GBPUSD=X']]
-
-    #remove outliers
-    df = df[(np.abs(stats.zscore(df)) < 20).all(axis=1)]
-
 
     # specifying period
     end = dt.datetime.now()  # end date is now
     start = dt.datetime(2005, 1, 1)   # start date  
     df = df[start:end]
-    # setting frequency
-    df = df.asfreq('D') # changes frequency to daily
-    #df.index # checks the frequency at bottom of printout
-    
-    # fill missing data using interpolate
-    df = df.interpolate(method = 'linear')
     
     #returns dataframe
-    return (df)
+    return df
 
 # function for correlation Matrix
 def get_Corr_Matrix():
@@ -354,7 +382,7 @@ sg.theme('black')
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
 layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST', justification = 'right')],
-          [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5)), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (20, 2), enable_events = True, key = '-LISTBOX_CLICK-')],
+          [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5)), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (21, 6), enable_events = True, key = '-LISTBOX_CLICK-')],
           [sg.HorizontalSeparator()],
           [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(), sg.Canvas(key='figCanvas_Hist'), sg.Canvas(key='figCanvas_Roc')]]
           
@@ -386,6 +414,7 @@ def drawMainChart():
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('EURUSD=X')
+    plt.tight_layout()                                           # smaller margins around chart in the figure
     _VARS['fig_agg'] = draw_figure(
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
