@@ -42,7 +42,9 @@ def importData():
     start = dt.datetime(2000, 1, 1)   # start date  
 
     # ticker data to import - used yahoofinance as reference to ticker format
-    tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
+    #tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
+
+    tickerlist = ['EURUSD=X', 'GBPUSD=X']
 
     # pandas datareader
     df = pdr.get_data_yahoo(tickerlist, start, end)
@@ -375,19 +377,66 @@ _VARS = {'window': False,
 
 # \\  -------- PYSIMPLEGUI THEME -------- //
 
+theme_dict = {'BACKGROUND': '#2B475D',
+                'TEXT': '#FFFFFF',
+                'INPUT': '#F2EFE8',
+                'TEXT_INPUT': '#000000',
+                'SCROLL': '#F2EFE8',
+                'BUTTON': ('#000000', '#C2D4D8'),
+                'PROGRESS': ('#FFFFFF', '#C7D5E0'),
+                'BORDER': 1,'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0}
+
+# sg.theme_add_new('Dashboard', theme_dict)     # if using 4.20.0.1+
+sg.LOOK_AND_FEEL_TABLE['Dashboard'] = theme_dict
+sg.theme('Dashboard')
+
+BORDER_COLOR = '#C7D5E0'
+DARK_HEADER_COLOR = '#1B2838'
+BPAD_TOP = ((20,20), (20, 10))
+BPAD_LEFT = ((20,10), (0, 10))
+BPAD_LEFT_INSIDE = (0, 10)
+BPAD_RIGHT = ((10,20), (10, 20))
+
+
 # Theme for pyplot
-plt.style.use('dark_background')
+#plt.style.use('dark_background')
 
 AppFont = 'Any 16'
-sg.theme('black')
+#sg.theme('black')
 
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
-layout = [[sg.Button('Correlations', font=AppFont), sg.Text(text = 'ASSET LIST', justification = 'right')],
-          [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5)), sg.VerticalSeparator(), sg.Listbox( values = assetsList, size = (21, 6), enable_events = True, key = '-LISTBOX_CLICK-')],
-          [sg.HorizontalSeparator()],
-          [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle'), sg.VerticalSeparator(), sg.Canvas(key='figCanvas_Hist'), sg.Canvas(key='figCanvas_Roc')]]
-          
+top = [[sg.Button('Correlations', font=AppFont), sg.Text('Dashboard'+ ' '*64, font='Any 20', background_color=DARK_HEADER_COLOR),
+               sg.Text('Tuesday 9 June 2020', font='Any 20', background_color=DARK_HEADER_COLOR)]]
+
+# main chart
+block_1 = [
+    [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5))]  
+          ]
+
+# forecast and cyclical chart
+block_2 = [
+    [sg.Canvas(key='figCanvas_Forecast'), sg.Canvas(key='figCanvas_Cycle')]
+          ]
+
+# watchlist 
+block_3 = [
+    [sg.Text(text = 'ASSET LIST', justification = 'c')],
+    [sg.Listbox( values = assetsList, size = (21, 6), enable_events = True, key = '-LISTBOX_CLICK-')]
+          ]
+
+block_4 = [
+    [sg.Canvas(key='figCanvas_Hist'), sg.Canvas(key='figCanvas_Roc')]
+          ]
+
+
+# \\  -------- LAYOUT -------- //
+
+layout = [[sg.Column(top, background_color=DARK_HEADER_COLOR, expand_x = True)],
+          [sg.Column(block_1, expand_x = True), sg.Column(block_3)],
+          [sg.Column(block_2, expand_x = True), sg.Column(block_4, expand_x = True)]
+         ]
+
 # \\  -------- APPLICATION WINDOW  -------- //
 
 _VARS['window'] = sg.Window('TickerWatch',
@@ -429,17 +478,19 @@ def updateMainChart():
     plt.figure(num = 1)           # tell the program we selecting figure 1 to update
     plt.clf()                     # clearing information on chart 
     plt.plot(data[assetSelected]) # plotting new selected data
-    plt.title(assetSelected)      # adding title from seleected data
+    plt.title(assetSelected)
+    plt.tight_layout()       # adding title from seleected data
     plt.draw()                    # drawing the information on the chart
 
 # \\  -------- CYCLICAL -------- //
 
 # draw cycle chart function
 def drawCycleChart():
-    _VARS['pltFig_cycle'] = plt.figure(num = 2)
+    _VARS['pltFig_cycle'] = plt.figure(num = 2, figsize =(5.75, 6), dpi = 80)
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('CYCLICAL TENDANCY')
+    plt.tight_layout() 
     _VARS['fig_agg_cycle'] = draw_figure(
         _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
 
@@ -454,6 +505,7 @@ def updateCycleChart():
     plt.clf()                     # clearing information on chart
     plt.plot(asset_cycle)         # plotting new selected data
     plt.title('CYCLICAL TENDANCY') # adding title from seleected data
+    plt.tight_layout() 
     plt.draw()                    # drawing the information on the chart
 
 
@@ -461,10 +513,11 @@ def updateCycleChart():
 
 # draw chart function
 def drawForecastChart():
-    _VARS['pltFig_forecast'] = plt.figure(num = 3)
+    _VARS['pltFig_forecast'] = plt.figure(num = 3, figsize =(5.75, 6), dpi = 80)
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('FORECAST')
+    plt.tight_layout() 
     _VARS['fig_agg_forecast'] = draw_figure(
         _VARS['window']['figCanvas_Forecast'].TKCanvas, _VARS['pltFig_forecast'])
 
@@ -475,16 +528,18 @@ def updateForecastChart():
     plt.clf()                            # clearing the chart
     plt.plot(df_forecast[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('FORECAST')                # adding a title
+    plt.tight_layout() 
     plt.draw()                           # drawing the information on the chart
 
 # \\  -------- HISTOGRAM -------- //
 
 def drawHistChart():
-    _VARS['pltFig_hist'] = plt.figure(num = 5)
+    _VARS['pltFig_hist'] = plt.figure(num = 5, figsize =(5.75, 6), dpi = 80)
     data = getData()
     data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
     plt.hist(data_ROC['EURUSD=X'], bins = 100)
     plt.title('HISTOGRAM')
+    plt.tight_layout() 
     _VARS['fig_agg_hist'] = draw_figure(
         _VARS['window']['figCanvas_Hist'].TKCanvas, _VARS['pltFig_hist'])
 
@@ -497,16 +552,18 @@ def updateHistChart():
     plt.clf()                            # clearing the chart
     plt.hist(data_ROC[assetSelected], bins = 100) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('HISTOGRAM')                # adding a title
+    plt.tight_layout() 
     plt.draw()  
 
 # \\  -------- RATE OF CHANGE -------- //
 
 def drawRocChart():
-    _VARS['pltFig_roc'] = plt.figure(num = 6)
+    _VARS['pltFig_roc'] = plt.figure(num = 6, figsize =(5.75, 6), dpi = 80)
     data = getData()
     data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
     plt.plot(data_ROC['EURUSD=X'])
     plt.title('RATE OF CHANGE')
+    plt.tight_layout() 
     _VARS['fig_agg_roc'] = draw_figure(
         _VARS['window']['figCanvas_Roc'].TKCanvas, _VARS['pltFig_roc'])
 
@@ -519,6 +576,7 @@ def updateRocChart():
     plt.clf()                            # clearing the chart
     plt.plot(data_ROC[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('RATE OF CHANGE')                # adding a title
+    plt.tight_layout() 
     plt.draw()  
 
 # \\  -------- UPDATING DISTRIBUTION CHARTS PERIOD PARAMETER BASED ON TIMEFRAME SLIDER -------- //
@@ -533,12 +591,14 @@ def updateDistCharts():
     plt.clf()                            # clearing the chart
     plt.hist(data_ROC[assetSelected], bins = 100) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('HISTOGRAM')                # adding a title
+    plt.tight_layout() 
     plt.draw()  
 
     plt.figure(num = 6)                  # tell the program we selecting figure 2 to update
     plt.clf()                            # clearing the chart
     plt.plot(data_ROC[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('RATE OF CHANGE')                # adding a title
+    plt.tight_layout() 
     plt.draw() 
 
     data_resampled = data.iloc[::period_selected, :] # skip every #th row in the dataframe
@@ -547,6 +607,7 @@ def updateDistCharts():
     plt.clf()                     # clearing information on chart 
     plt.plot(data_resampled[assetSelected]) # plotting new selected data
     plt.title(assetSelected)      # adding title from seleected data
+    plt.tight_layout() 
     plt.draw()                    # drawing the information on the chart 
 
 
@@ -566,15 +627,25 @@ try:
     # try reading in the dataframe - later change this to an option the user can decide
     forecast = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\df_forecast.csv', index_col = 0)
 
+    print('try statement')
+
     # getting last day of forecast - 30 days from now
     forecast_end = dt.datetime.now() + timedelta(days = 29)  # starting day + forecast days - 1. 
     forecast_end = forecast_end.date() # formatting to just Y M D
 
+    print(forecast_end)
+
     # converting last day of df_index into appropriate variable format
     final_forecast = datetime.strptime(forecast.index[29], '%Y-%m-%d %H:%M:%S.%f').date()
+
+    print(final_forecast)
+
+    print('try statement1')
  
     # check if forecast in 30 days time has already been made
     if final_forecast == forecast_end:
+
+        print('if statement')
 
         # convert index to y - m - d format and datetime
         forecast.index = pd.to_datetime(forecast.index).strftime('%Y-%m-%d')
@@ -582,7 +653,11 @@ try:
         # if forecast has already been made, load csv data to variable
         df_forecast = forecast
 
+        print('if statement1')
+
 except:
+
+    print('except statement')
     
     # if forecast wasnt in csv file called function to generate forecast
     df_forecast = get_forecast_analysis() # only call this once on start up as it is intensive - later improve saving file if not made already today etc
@@ -592,6 +667,9 @@ except:
 
     # convert index to y - m - d format and datetime
     df_forecast.index = pd.to_datetime(df_forecast.index).strftime('%Y-%m-%d')
+
+    print('except statement1')
+
 
 drawForecastChart()
 
