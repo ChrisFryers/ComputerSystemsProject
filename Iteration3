@@ -92,8 +92,9 @@ def getData():
 def get_Corr_Matrix():
     
     # create layout and window
-    layout2 = [[sg.Text('CORRERLATION MATRIX')],
-              [sg.Canvas(key='figCanvas_Corr', expand_x = True, expand_y = True)]]
+    layout2 = [
+              [sg.Canvas(key='figCanvas_Corr', expand_x = True, expand_y = True)]
+              ]
 
     _VARS['window2'] = sg.Window('CORRELATION MATRIX',
                             layout2,
@@ -406,8 +407,9 @@ AppFont = 'Any 16'
 
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
-top = [[sg.Button('Correlations', font=AppFont), sg.Text('Dashboard'+ ' '*64, font='Any 20', background_color=DARK_HEADER_COLOR),
-               sg.Text('Tuesday 9 June 2020', font='Any 20', background_color=DARK_HEADER_COLOR)]]
+top = [[sg.Button('CORRELATIONS', font=AppFont, key = 'Correlations'), 
+        sg.Text('TICKERWATCH', font='Any 20', expand_x= True, justification = 'center'),
+        sg.Text(str(dt.datetime.now().date()), font='Any 20', justification = 'right')]]
 
 # main chart
 block_1 = [
@@ -421,8 +423,10 @@ block_2 = [
 
 # watchlist 
 block_3 = [
-    [sg.Text(text = 'ASSET LIST', justification = 'c')],
-    [sg.Listbox( values = assetsList, size = (21, 6), enable_events = True, key = '-LISTBOX_CLICK-')]
+    [sg.Text(text = 'ASSETS LIST',expand_x = True , justification = 'center')],
+    [sg.Listbox( values = assetsList, size = (21, 12), enable_events = True, key = '-LISTBOX_CLICK-')],
+    [sg.Text(text = 'CUSTOM LIST',expand_x = True , justification = 'center')],
+    [sg.Listbox( values = assetsList, size = (21, 12), enable_events = True, key = '')]
           ]
 
 block_4 = [
