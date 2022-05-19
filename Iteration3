@@ -388,16 +388,8 @@ theme_dict = {'BACKGROUND': '#2B475D',
                 'BORDER': 1,'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0}
 
 # sg.theme_add_new('Dashboard', theme_dict)     # if using 4.20.0.1+
-sg.LOOK_AND_FEEL_TABLE['Dashboard'] = theme_dict
-sg.theme('Dashboard')
-
-BORDER_COLOR = '#C7D5E0'
-DARK_HEADER_COLOR = '#1B2838'
-BPAD_TOP = ((20,20), (20, 10))
-BPAD_LEFT = ((20,10), (0, 10))
-BPAD_LEFT_INSIDE = (0, 10)
-BPAD_RIGHT = ((10,20), (10, 20))
-
+sg.LOOK_AND_FEEL_TABLE['TICKERWATCH'] = theme_dict
+sg.theme('TICKERWATCH')
 
 # Theme for pyplot
 #plt.style.use('dark_background')
@@ -436,7 +428,7 @@ block_4 = [
 
 # \\  -------- LAYOUT -------- //
 
-layout = [[sg.Column(top, background_color=DARK_HEADER_COLOR, expand_x = True)],
+layout = [[sg.Column(top, expand_x = True)],
           [sg.Column(block_1, expand_x = True), sg.Column(block_3)],
           [sg.Column(block_2, expand_x = True), sg.Column(block_4, expand_x = True)]
          ]
@@ -552,10 +544,18 @@ def updateHistChart():
     data = getData()
     data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
 
+    # calculating quantiles
+    q_5 = float(data_ROC[assetSelected].quantile(0.5))
+    q_75 = float(data_ROC[assetSelected].quantile(0.75))
+    q_25 = float(data_ROC[assetSelected].quantile(0.25))
+
     plt.figure(num = 5)                  # tell the program we selecting figure 2 to update
     plt.clf()                            # clearing the chart
     plt.hist(data_ROC[assetSelected], bins = 100) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('HISTOGRAM')                # adding a title
+    plt.axvline(q_5)
+    plt.axvline(q_25)
+    plt.axvline(q_75)
     plt.tight_layout() 
     plt.draw()  
 
@@ -576,10 +576,18 @@ def updateRocChart():
     data = getData()
     data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
 
+    # calculating quantiles
+    q_5 = float(data_ROC[assetSelected].quantile(0.5))
+    q_75 = float(data_ROC[assetSelected].quantile(0.75))
+    q_25 = float(data_ROC[assetSelected].quantile(0.25))
+
     plt.figure(num = 6)                  # tell the program we selecting figure 2 to update
     plt.clf()                            # clearing the chart
     plt.plot(data_ROC[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('RATE OF CHANGE')                # adding a title
+    plt.axhline(q_5)
+    plt.axhline(q_25)
+    plt.axhline(q_75)
     plt.tight_layout() 
     plt.draw()  
 
@@ -590,11 +598,20 @@ def updateDistCharts():
 
     data = getData()
     data_ROC = data.pct_change(periods = period_selected)  # change period number to selected timeframe eventually
+    data_ROC = data_ROC[period_selected:]  # remove first nulls
+
+    # calculating quantiles
+    q_5 = float(data_ROC[assetSelected].quantile(0.5))
+    q_75 = float(data_ROC[assetSelected].quantile(0.75))
+    q_25 = float(data_ROC[assetSelected].quantile(0.25))
 
     plt.figure(num = 5)                  # tell the program we selecting figure 2 to update
     plt.clf()                            # clearing the chart
     plt.hist(data_ROC[assetSelected], bins = 100) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('HISTOGRAM')                # adding a title
+    plt.axvline(q_5)
+    plt.axvline(q_25)
+    plt.axvline(q_75)
     plt.tight_layout() 
     plt.draw()  
 
@@ -602,6 +619,9 @@ def updateDistCharts():
     plt.clf()                            # clearing the chart
     plt.plot(data_ROC[assetSelected]) # accessing the dataframe of forecasted data and picking the column of the selected object
     plt.title('RATE OF CHANGE')                # adding a title
+    plt.axhline(q_5)
+    plt.axhline(q_25)
+    plt.axhline(q_75)
     plt.tight_layout() 
     plt.draw() 
 
