@@ -631,25 +631,16 @@ try:
     # try reading in the dataframe - later change this to an option the user can decide
     forecast = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\df_forecast.csv', index_col = 0)
 
-    print('try statement')
-
     # getting last day of forecast - 30 days from now
     forecast_end = dt.datetime.now() + timedelta(days = 29)  # starting day + forecast days - 1. 
     forecast_end = forecast_end.date() # formatting to just Y M D
 
-    print(forecast_end)
-
     # converting last day of df_index into appropriate variable format
     final_forecast = datetime.strptime(forecast.index[29], '%Y-%m-%d %H:%M:%S.%f').date()
 
-    print(final_forecast)
-
-    print('try statement1')
  
     # check if forecast in 30 days time has already been made
     if final_forecast == forecast_end:
-
-        print('if statement')
 
         # convert index to y - m - d format and datetime
         forecast.index = pd.to_datetime(forecast.index).strftime('%Y-%m-%d')
@@ -657,12 +648,20 @@ try:
         # if forecast has already been made, load csv data to variable
         df_forecast = forecast
 
-        print('if statement1')
+    else:
 
-except:
+        # if forecast wasnt in csv file called function to generate forecast
+        df_forecast = get_forecast_analysis() # only call this once on start up as it is intensive - later improve saving file if not made already today etc
 
-    print('except statement')
-    
+        # save forecast to csv
+        df_forecast.to_csv('df_forecast.csv')
+
+        # convert index to y - m - d format and datetime
+        df_forecast.index = pd.to_datetime(df_forecast.index).strftime('%Y-%m-%d')
+
+# no file found
+except: 
+
     # if forecast wasnt in csv file called function to generate forecast
     df_forecast = get_forecast_analysis() # only call this once on start up as it is intensive - later improve saving file if not made already today etc
 
@@ -671,9 +670,6 @@ except:
 
     # convert index to y - m - d format and datetime
     df_forecast.index = pd.to_datetime(df_forecast.index).strftime('%Y-%m-%d')
-
-    print('except statement1')
-
 
 drawForecastChart()
 
@@ -716,7 +712,7 @@ while True:
 
         except:
 
-            sg.Popup('Please Select and Asset From the ListBox')
+            sg.Popup('Please Select and Asset From the ListBox            ')
         
         else:
 
