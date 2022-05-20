@@ -142,7 +142,13 @@ def getAssetList():
     assetsList = list(data)
     return assetsList
 
+# creating lists for watchlists
+
+# default watchlist with all tickers
 assetsList = getAssetList()
+
+# custom watchlist with user selected tickers
+custom_assetList = []
 
 # \\  -------- CYCLICAL ANALYSIS -------- //
 # function to get cyclcial analysis data
@@ -416,9 +422,10 @@ block_2 = [
 # watchlist 
 block_3 = [
     [sg.Text(text = 'ASSETS LIST',expand_x = True , justification = 'center')],
-    [sg.Listbox( values = assetsList, size = (21, 12), enable_events = True, key = '-LISTBOX_CLICK-')],
+    [sg.Listbox( values = assetsList, size = (21, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
     [sg.Text(text = 'CUSTOM LIST',expand_x = True , justification = 'center')],
-    [sg.Listbox( values = assetsList, size = (21, 12), enable_events = True, key = '')]
+    [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (23,1))],
+    [sg.Listbox( values = custom_assetList, size = (21, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
           ]
 
 block_4 = [
@@ -443,6 +450,9 @@ _VARS['window'] = sg.Window('TickerWatch',
                             location=(100, 100),
                             element_justification="center",
                             background_color='black')
+
+# enable event for input box upon pressing enter
+_VARS['window']['INPUT_TEXT'].bind("<Return>", "_Enter")
 
 # \\  -------- PYSIMPLEGUI -------- //
 
@@ -732,7 +742,7 @@ while True:
 
         except:
 
-            sg.Popup('Please Select and Asset From the ListBox            ')
+            sg.Popup('Please Select and Asset From the ListBox')
         
         else:
 
@@ -742,7 +752,38 @@ while True:
 
             updateDistCharts()
 
+    # input for custom watchlist
+    if event == 'INPUT_TEXT' + "_Enter":
+
+        if value['INPUT_TEXT'] in assetsList:
+
+            custom_assetList.append(value['INPUT_TEXT'])
+
+            # refreshes the call to the listbox to display the new variable
+            _VARS['window']['-CUSTOM-LISTBOX_CLICK-'].update(values = custom_assetList)
+
+        else:
+
+            sg.Popup('No Asset With That Ticker')
     
-    
+    # logic for custom watchlist
+
+    # if listbox item is selected:
+    if event == '-CUSTOM-LISTBOX_CLICK-':
+
+       # saves listbox item selected
+       assetSelected = value['-CUSTOM-LISTBOX_CLICK-']
+       #calls update chart function
+       updateCycleChart()
+
+       updateMainChart()
+       
+       updateForecastChart()
+
+       updateHistChart()
+
+       updateRocChart()
+
+
 
 _VARS['window'].close()
