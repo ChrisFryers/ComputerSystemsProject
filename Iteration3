@@ -675,6 +675,9 @@ try:
         # convert index to y - m - d format and datetime
         forecast.index = pd.to_datetime(forecast.index).strftime('%Y-%m-%d')
 
+        # new
+        forecast.index = forecast.index = [1, 2, 3,4 ,5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+
         # if forecast has already been made, load csv data to variable
         df_forecast = forecast
 
@@ -689,6 +692,9 @@ try:
         # convert index to y - m - d format and datetime
         df_forecast.index = pd.to_datetime(df_forecast.index).strftime('%Y-%m-%d')
 
+        # new
+        df_forecast.index = df_forecast.index = [1, 2, 3,4 ,5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+
 # no file found
 except: 
 
@@ -700,6 +706,9 @@ except:
 
     # convert index to y - m - d format and datetime
     df_forecast.index = pd.to_datetime(df_forecast.index).strftime('%Y-%m-%d')
+
+    # new
+    df_forecast.index = df_forecast.index = [1, 2, 3,4 ,5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
 
 drawForecastChart()
 
