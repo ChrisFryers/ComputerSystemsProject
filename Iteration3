@@ -449,7 +449,9 @@ _VARS['window'] = sg.Window('TickerWatch',
                             resizable=True,
                             location=(100, 100),
                             element_justification="center",
-                            background_color='black')
+                            background_color='black',
+                            icon = 'PySimpleGUIExamples/app_icon.ico'
+                            )
 
 # enable event for input box upon pressing enter
 _VARS['window']['INPUT_TEXT'].bind("<Return>", "_Enter")
