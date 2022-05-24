@@ -44,7 +44,7 @@ def importData():
     # ticker data to import - used yahoofinance as reference to ticker format
     #tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
 
-    tickerlist = ['EURUSD=X', 'GBPUSD=X']
+    tickerlist = ['GBPUSD=X', 'EURUSD=X']
 
     # pandas datareader
     df = pdr.get_data_yahoo(tickerlist, start, end)
@@ -149,6 +149,21 @@ assetsList = getAssetList()
 
 # custom watchlist with user selected tickers
 custom_assetList = []
+
+# \\  -------- SORTING ASSETLIST -------- //
+
+def sort_assetList_AZ():
+    
+    # using assetsList
+    assetsList = getAssetList()
+
+    # sorting assetsList and saving to new variable
+    assetsList = sorted(assetsList)
+
+    return assetsList
+
+# sorted assetsLists
+az_assetslist = sort_assetList_AZ()
 
 # \\  -------- CYCLICAL ANALYSIS -------- //
 # function to get cyclcial analysis data
@@ -405,7 +420,7 @@ AppFont = 'Any 16'
 
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
-top = [[sg.Button('CORRELATIONS', font=AppFont, key = 'Correlations'), 
+top = [[sg.Button('CORRELATIONS', font = AppFont, key = 'Correlations'), 
         sg.Text('TICKERWATCH', font='Any 20', expand_x= True, justification = 'center'),
         sg.Text(str(dt.datetime.now().date()), font='Any 20', justification = 'right')]]
 
@@ -421,11 +436,12 @@ block_2 = [
 
 # watchlist 
 block_3 = [
-    [sg.Text(text = 'ASSETS LIST',expand_x = True , justification = 'center')],
-    [sg.Listbox( values = assetsList, size = (21, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
-    [sg.Text(text = 'CUSTOM LIST',expand_x = True , justification = 'center')],
+    [sg.Text(text = 'ASSETS LIST', expand_x = True , justification = 'center')],
+    [sg.Button('A-Z', size = (3, 1), key = '-SORT-AZ-')],
+    [sg.Listbox( values = assetsList, size = (18, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
+    [sg.Text(text = 'CUSTOM LIST', expand_x = True, justification = 'center')],
     [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (23,1))],
-    [sg.Listbox( values = custom_assetList, size = (21, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
+    [sg.Listbox( values = custom_assetList, size = (18, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
           ]
 
 block_4 = [
@@ -794,6 +810,13 @@ while True:
        updateHistChart()
 
        updateRocChart()
+
+    # logic for sorting watchlist
+
+    if event == '-SORT-AZ-':
+
+        _VARS['window']['-LISTBOX_CLICK-'].update(values = az_assetslist)
+
 
 
 
