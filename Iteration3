@@ -1,6 +1,8 @@
 # \\  -------- IMPORTS -------- //
 
 from ast import Return
+from codecs import getdecoder
+from pkgutil import get_data
 from typing import List
 from unicodedata import name
 import PySimpleGUI as sg
@@ -165,7 +167,49 @@ def sort_assetList_AZ():
 # sorted assetsLists
 az_assetslist = sort_assetList_AZ()
 
+# sort by last price - high to low
+def sort_assetList_Price():
+
+    # using assetList
+    assetsList = getAssetList()
+
+    # getting price data
+    data = getData()
+
+    # create empty list for prices only
+    assetPrice = []
+
+    # loop to extract last price from each asset
+    for i in assetsList:
+        price = data[i][-1]
+        assetPrice.append(price)
+
+    # create dataframe with asset tickers ass column headings
+    df_price = pd.DataFrame(columns = assetsList)
+
+    df_length = len(df_price)
+
+    df_price.loc[df_length] = assetPrice
+
+    # create series that contains price values and an index of tickers
+    var = df_price.iloc[0]
+
+    # sort the values
+    var = var.sort_values(ascending = False)
+
+    #extract the list of tickers
+    listofprices = var.index
+
+    # create list type object with tickers
+    listofprices = list(listofprices)
+    # sort by row of prices
+
+    return listofprices
+
+price_assetslist = sort_assetList_Price()
+
 # \\  -------- CYCLICAL ANALYSIS -------- //
+
 # function to get cyclcial analysis data
 def get_cyclical_analysis():
     
@@ -437,11 +481,11 @@ block_2 = [
 # watchlist 
 block_3 = [
     [sg.Text(text = 'ASSETS LIST', expand_x = True , justification = 'center')],
-    [sg.Button('A-Z', size = (3, 1), key = '-SORT-AZ-')],
+    [sg.Button('A-Z', size = (3, 1), key = '-SORT-AZ-'), sg.Button('PRICE', size = (5, 1), key = '-SORT-PRICE-')],
     [sg.Listbox( values = assetsList, size = (18, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
     [sg.Text(text = 'CUSTOM LIST', expand_x = True, justification = 'center')],
-    [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (23,1))],
-    [sg.Listbox( values = custom_assetList, size = (18, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
+    [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (20,1))],
+    [sg.Listbox( values = custom_assetList, size = (17, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
           ]
 
 block_4 = [
@@ -817,7 +861,10 @@ while True:
 
         _VARS['window']['-LISTBOX_CLICK-'].update(values = az_assetslist)
 
+    if event == '-SORT-PRICE-':
 
+        _VARS['window']['-LISTBOX_CLICK-'].update(values = price_assetslist)
+        
 
 
 _VARS['window'].close()
