@@ -208,6 +208,9 @@ def sort_assetList_Price():
 
 price_assetslist = sort_assetList_Price()
 
+
+# sort watch list by 
+
 # \\  -------- CYCLICAL ANALYSIS -------- //
 
 # function to get cyclcial analysis data
@@ -484,8 +487,8 @@ block_3 = [
     [sg.Button('A-Z', size = (3, 1), key = '-SORT-AZ-'), sg.Button('PRICE', size = (5, 1), key = '-SORT-PRICE-')],
     [sg.Listbox( values = assetsList, size = (18, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
     [sg.Text(text = 'CUSTOM LIST', expand_x = True, justification = 'center')],
-    [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (20,1))],
-    [sg.Listbox( values = custom_assetList, size = (17, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
+    [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (20,1), justification = 'center')],
+    [sg.Listbox( values = custom_assetList, size = (18, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
           ]
 
 block_4 = [
