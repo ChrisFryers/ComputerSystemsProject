@@ -210,6 +210,45 @@ price_assetslist = sort_assetList_Price()
 
 
 # sort watch list by 
+def sort_assetList_ROC():
+
+    #get price data
+    df = getData()
+
+    # create rate of change dataframe
+    df_ROC = df.pct_change(periods = 1)  # change period number to selected timeframe eventually
+    df_ROC = df_ROC[1:]  # remove first nulls
+
+    assetPrice = []
+
+    # loop to extract last price from each asset
+    for i in assetsList:
+        price = df_ROC[i][-1]
+        assetPrice.append(price)
+
+    # create dataframe with asset tickers ass column headings
+    df_price = pd.DataFrame(columns = assetsList)
+
+    df_length = len(df_price)
+
+    df_price.loc[df_length] = assetPrice
+
+    # create series that contains price values and an index of tickers
+    var = df_price.iloc[0]
+
+    # sort the values
+    var = var.sort_values(ascending = False)
+
+    #extract the list of tickers
+    listofprices = var.index
+
+    # create list type object with tickers
+    listofprices = list(listofprices)
+    # sort by row of prices
+
+    return listofprices
+
+ROC_assetslist = sort_assetList_ROC()
 
 # \\  -------- CYCLICAL ANALYSIS -------- //
 
@@ -484,7 +523,7 @@ block_2 = [
 # watchlist 
 block_3 = [
     [sg.Text(text = 'ASSETS LIST', expand_x = True , justification = 'center')],
-    [sg.Button('A-Z', size = (3, 1), key = '-SORT-AZ-'), sg.Button('PRICE', size = (5, 1), key = '-SORT-PRICE-')],
+    [sg.Button('A-Z', size = (3, 1), key = '-SORT-AZ-'), sg.Button('PRICE', size = (5, 1), key = '-SORT-PRICE-'), sg.Button('CHNG', size = (5, 1), key = '-SORT-ROC-')],
     [sg.Listbox( values = assetsList, size = (18, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
     [sg.Text(text = 'CUSTOM LIST', expand_x = True, justification = 'center')],
     [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (20,1), justification = 'center')],
@@ -867,6 +906,10 @@ while True:
     if event == '-SORT-PRICE-':
 
         _VARS['window']['-LISTBOX_CLICK-'].update(values = price_assetslist)
+
+    if event == '-SORT-ROC-':
+
+        _VARS['window']['-LISTBOX_CLICK-'].update(values = ROC_assetslist)
         
 
 
