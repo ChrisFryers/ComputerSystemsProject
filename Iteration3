@@ -527,7 +527,9 @@ block_3 = [
     [sg.Listbox( values = assetsList, size = (18, 11), enable_events = True, key = '-LISTBOX_CLICK-')],
     [sg.Text(text = 'CUSTOM LIST', expand_x = True, justification = 'center')],
     [sg.Input(key = 'INPUT_TEXT', default_text = 'Enter A Ticker', enable_events = True, size = (20,1), justification = 'center')],
-    [sg.Listbox( values = custom_assetList, size = (18, 11), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
+    [sg.Listbox( values = custom_assetList, size = (18, 7), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')],
+    [sg.Text(text = '2ND TICKER', expand_x = True, justification = 'center')],
+    [sg.Input(key = 'ADDITIONAL_TICKER', default_text = 'Enter A Ticker', enable_events = True, size = (20,1), justification = 'center')]
           ]
 
 block_4 = [
@@ -555,8 +557,11 @@ _VARS['window'] = sg.Window('TickerWatch',
                             icon = 'PySimpleGUIExamples/app_icon.ico'
                             )
 
-# enable event for input box upon pressing enter
+# enable event for input boxs upon pressing enter
 _VARS['window']['INPUT_TEXT'].bind("<Return>", "_Enter")
+
+
+_VARS['window']['ADDITIONAL_TICKER'].bind("<Return>", "_Enter")
 
 # \\  -------- PYSIMPLEGUI -------- //
 
@@ -591,6 +596,24 @@ def updateMainChart():
     plt.title(assetSelected)
     plt.tight_layout()       # adding title from seleected data
     plt.draw()                    # drawing the information on the chart
+
+# update main chart with additional ticker symbol
+def updateMainChartAdd():
+
+    #getting data to display
+    data = getData()
+
+    # updating chart
+    plt.figure(num = 1)           # tell the program we selecting figure 1 to update
+    plt.clf()                     # clearing information on chart 
+    plt.plot(data[assetSelected]) # plotting new selected data
+    plt.plot(data[assetSelected2]) # plotting new selected data
+    plt.title(assetSelected)
+    plt.tight_layout()       # adding title from seleected data
+    plt.draw()                    # drawing the information on the chart
+
+    sg.Popup('func - chart drawn')
+
 
 # \\  -------- CYCLICAL -------- //
 
@@ -910,7 +933,29 @@ while True:
     if event == '-SORT-ROC-':
 
         _VARS['window']['-LISTBOX_CLICK-'].update(values = ROC_assetslist)
-        
 
+
+    # input for custom additional ticker symbol on main chart
+    if event == 'ADDITIONAL_TICKER' + "_Enter":
+
+        sg.Popup('entered if statement')
+
+        if value['ADDITIONAL_TICKER'] in assetsList:
+
+            sg.Popup('entered second if statement')
+
+            assetSelected2 = value['ADDITIONAL_TICKER']
+
+            sg.Popup('entered second if statement, second part')
+
+            updateMainChartAdd()
+
+            sg.Popup('entered second if statement, third part')
+
+        else:
+
+            sg.Popup('No Asset With That Ticker')
+    
+    # logic for custom watchlist
 
 _VARS['window'].close()
