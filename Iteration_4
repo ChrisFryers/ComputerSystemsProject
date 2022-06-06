@@ -44,9 +44,9 @@ def importData():
     start = dt.datetime(2000, 1, 1)   # start date  
 
     # ticker data to import - used yahoofinance as reference to ticker format
-    #tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
+    tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
 
-    tickerlist = ['GBPUSD=X', 'EURUSD=X']
+    #tickerlist = ['GBPUSD=X', 'EURUSD=X']
 
     # pandas datareader
     df = pdr.get_data_yahoo(tickerlist, start, end)
@@ -80,7 +80,7 @@ def getData():
 
     
     #df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
-    df = df[['EURUSD=X', 'GBPUSD=X']]
+    #df = df[['EURUSD=X', 'GBPUSD=X']]
 
     # specifying period
     end = dt.datetime.now()  # end date is now
@@ -404,8 +404,8 @@ def get_forecast_analysis():
 
 
         # Training the model
-        epochs = 1 # set to 13 for optimal
-        batch_size = 150 # set to 12 as optimal
+        epochs = 6 # set to 13 for optimal
+        batch_size = 24 # set to 19 as optimal
         early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
         history = model.fit(x_train, y_train, 
                             batch_size=batch_size, 
@@ -840,9 +840,13 @@ try:
     # converting last day of df_index into appropriate variable format
     final_forecast = datetime.strptime(forecast.index[29], '%Y-%m-%d %H:%M:%S.%f').date()
 
+    print(file_direct)
+
  
     # check if forecast in 30 days time has already been made
     if final_forecast == forecast_end:
+
+        print(file_direct)
 
         # convert index to y - m - d format and datetime
         forecast.index = pd.to_datetime(forecast.index).strftime('%Y-%m-%d')
@@ -867,14 +871,18 @@ try:
         # new
         df_forecast.index = df_forecast.index = [1, 2, 3,4 ,5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
 
+        print(file_direct)
+
 # no file found
 except: 
+
+    print('except statement: file not complete, creating new forecasts')
 
     # if forecast wasnt in csv file called function to generate forecast
     df_forecast = get_forecast_analysis() # only call this once on start up as it is intensive - later improve saving file if not made already today etc
 
     # save forecast to csv
-    df_forecast.to_csv('df_forecast.csv')
+    df_forecast.to_csv(file_direct)
 
     # convert index to y - m - d format and datetime
     df_forecast.index = pd.to_datetime(df_forecast.index).strftime('%Y-%m-%d')
