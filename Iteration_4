@@ -20,7 +20,7 @@ import math # Mathematical functions
 from datetime import date, timedelta, datetime # Date Functions
 from pandas.plotting import register_matplotlib_converters # This function adds plotting functions for calender dates
 import matplotlib.dates as mdates # Formatting dates
-from sklearn.metrics import mean_absolute_error, mean_squared_error # Packages for measuring model performance / errors
+#from sklearn.metrics import mean_absolute_error, mean_squared_error # Packages for measuring model performance / errors
 from keras.models import Sequential # Deep learning library, used for neural networks
 from keras.layers import LSTM, Dense, Dropout # Deep learning classes for recurrent and regular densely-connected layers
 from keras.callbacks import EarlyStopping # EarlyStopping during model training
@@ -468,7 +468,7 @@ def make_directory_wind():
             sg.FileBrowse()],
             [sg.Button('OPEN'), sg.B('CLEAR')]
             ]
-    window = sg.Window('Filename History Clearable', layout, resizable=True)
+    window = sg.Window('Choose an Excel File', layout, resizable=True, background_color='white')
 
     return window
 
@@ -520,7 +520,7 @@ _VARS = {'window': False,
 
 # \\  -------- PYSIMPLEGUI THEME -------- //
 
-theme_dict = {'BACKGROUND': '#2B475D',
+theme_dict = {'BACKGROUND': '#FFFFFF',
                 'TEXT': '#FFFFFF',
                 'INPUT': '#F2EFE8',
                 'TEXT_INPUT': '#000000',
@@ -530,16 +530,16 @@ theme_dict = {'BACKGROUND': '#2B475D',
                 'BORDER': 1,'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0}
 
 # sg.theme_add_new('Dashboard', theme_dict)     # if using 4.20.0.1+
-sg.LOOK_AND_FEEL_TABLE['TICKERWATCH'] = theme_dict
-sg.theme('TICKERWATCH')
+#sg.LOOK_AND_FEEL_TABLE['TICKERWATCH'] = theme_dict
+#sg.theme('TICKERWATCH')
 
 # Theme for pyplot
-plt.style.use('dark_background')
+plt.style.use('fivethirtyeight')
 
 AppFont = ['Bahnschrift Condensed', 12]
 TitleFont = ['Bahnschrift Condensed', 18]
 ListboxFont = ['Bahnschrift Condensed', 15]
-sg.theme('black')
+#sg.theme('white')
 
 # \\  -------- ELEMENTS IN LAYOUT -------- //
 
@@ -549,7 +549,7 @@ top = [[sg.Button('CORRELATIONS', mouseover_colors=('white', '#2fa4e7'), font = 
 
 # main chart
 block_1 = [
-    [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5))]  
+    [sg.Canvas(key='figCanvas', expand_x = True, expand_y = True), sg.Slider(key = 'TIMEFRAME_ADJUST', range = (1, 365), default_value = 1, resolution = 1, orientation = 'v', enable_events = True, size = (20, 5), background_color='white')]  
           ]
 
 # forecast and cyclical chart
@@ -562,21 +562,21 @@ block_3 = [
     [sg.Text(text = 'ASSETS LIST', background_color = '#2fa4e7', font = AppFont , expand_x = True , justification = 'center')],
     [sg.Column([
         [sg.Button('A-Z', size = (5, 1), mouseover_colors=('white', '#2fa4e7'), font = AppFont , key = '-SORT-AZ-'), sg.Button('PRICE', mouseover_colors=('white', '#2fa4e7'), font = AppFont , size = (5, 1), key = '-SORT-PRICE-'), sg.Button('CHNG', mouseover_colors=('white', '#2fa4e7'), font = AppFont , size = (5, 1), key = '-SORT-ROC-')]
-        ], justification = 'center')],
+        ], justification = 'center', background_color='white')],
     [sg.Column([
         [sg.Listbox( values = assetsList, font = ListboxFont , size = (18, 8), enable_events = True, key = '-LISTBOX_CLICK-')]
-        ], justification = 'center')],
+        ], justification = 'center', background_color='white')],
     [sg.Text(text = 'CUSTOM LIST', background_color = '#2fa4e7', font = AppFont , expand_x = True, justification = 'center')],
     [sg.Column([
         [sg.Input(key = 'INPUT_TEXT', font = AppFont , default_text = 'Enter A Ticker', enable_events = True, size = (22,1), justification = 'center')]
-        ], justification = 'center')],
+        ], justification = 'center', background_color='white')],
     [sg.Column([
         [sg.Listbox( values = custom_assetList, font = ListboxFont , size = (18, 5), enable_events = True, key = '-CUSTOM-LISTBOX_CLICK-')]
-        ], justification = 'center')],
+        ], justification = 'center', background_color='white')],
     [sg.Text(text = '2ND TICKER', background_color = '#2fa4e7', font = AppFont , expand_x = True, justification = 'center')],
     [sg.Column([
         [sg.Input(key = 'ADDITIONAL_TICKER', font = AppFont , default_text = 'Enter A Ticker', enable_events = True, size = (22,1), justification = 'center')]
-        ], justification = 'center')]
+        ], justification = 'center', background_color='white')]
     
           ]
 
@@ -587,9 +587,9 @@ block_4 = [
 
 # \\  -------- LAYOUT -------- //
 
-layout = [[sg.Column(top, expand_x = True)],
-          [sg.Column(block_1, expand_x = True), sg.Column(block_3)],
-          [sg.Column(block_2, expand_x = True), sg.Column(block_4, expand_x = True)]
+layout = [[sg.Column(top, expand_x = True, background_color='white')],
+          [sg.Column(block_1, expand_x = True, background_color='white'), sg.Column(block_3, background_color='white')],
+          [sg.Column(block_2, expand_x = True, background_color='white'), sg.Column(block_4, expand_x = True, background_color='white')]
          ]
 
 # \\  -------- APPLICATION WINDOW  -------- //
@@ -601,7 +601,7 @@ _VARS['window'] = sg.Window('TickerWatch',
                             resizable=True,
                             location=(100, 100),
                             element_justification="center",
-                            background_color='black',
+                            background_color='white',
                             icon = 'PySimpleGUIExamples/app_icon.ico'
                             )
 
