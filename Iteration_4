@@ -44,9 +44,9 @@ def importData():
     start = dt.datetime(2000, 1, 1)   # start date  
 
     # ticker data to import - used yahoofinance as reference to ticker format
-    tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
+    #tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
 
-    #tickerlist = ['GBPUSD=X', 'EURUSD=X']
+    tickerlist = ['GBPUSD=X', 'EURUSD=X']
 
     # pandas datareader
     df = pdr.get_data_yahoo(tickerlist, start, end)
@@ -75,12 +75,6 @@ def getData():
     df = df.interpolate(method = 'linear') # fill gaps to the correct frequency
 
     df = df[(np.abs(stats.zscore(df)) < 10).all(axis=1)] # remove any extreme outliers
-
-
-
-    
-    #df = pd.read_csv(r'C:\Users\Chris\Desktop\UlsterUniversity\Final Project\PySimpleGUI\Closedf.csv', parse_dates = True, index_col = 'Date')
-    #df = df[['EURUSD=X', 'GBPUSD=X']]
 
     # specifying period
     end = dt.datetime.now()  # end date is now
@@ -283,8 +277,11 @@ def get_forecast_analysis():
     # creating empty dataframe
     df_forecast = pd.DataFrame(index = dateRange)
 
+    #NUM_EPOCHS = 2
 
+    #NUM_BATCHES = 100
 
+    #NUM_SEQ = 50
 
 
     # \\  -------- START LOOP TO ITER THROUGH DATAFRMAE COLUMNS -------- //
@@ -303,10 +300,6 @@ def get_forecast_analysis():
 
         # We reset the index, so we can convert the date-index to a number-index
         df_train = df_train.reset_index(drop=True).copy()
-
-
-
-
 
 
         # preparing the data w/ feature engineering
@@ -338,12 +331,10 @@ def get_forecast_analysis():
         np_scaled_c = scaler_pred.fit_transform(np_c_unscaled)  
 
 
-
-
         # \\  -------- SETTING SEQUENCE LENGTHS AND TEST AND TRAIN DATA -------- //
 
         # Set the input_sequence_length length - this is the timeframe used to make a single prediction - experiment witht his number to find optimal accuracy
-        input_sequence_length = 50
+        input_sequence_length = NUM_SEQ
         # The output sequence length is the number of steps that the neural network predicts
         output_sequence_length = 30 #
 
@@ -404,8 +395,8 @@ def get_forecast_analysis():
 
 
         # Training the model
-        epochs = 6 # set to 13 for optimal
-        batch_size = 24 # set to 19 as optimal
+        epochs = NUM_EPOCHS # set to 13 for optimal
+        batch_size = NUM_BATCHES # set to 19 as optimal
         early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
         history = model.fit(x_train, y_train, 
                             batch_size=batch_size, 
@@ -466,6 +457,10 @@ def make_directory_wind():
     layout = [[sg.Text('My Window')],
             [sg.Combo(sg.user_settings_get_entry('-filenames-', []), default_value=sg.user_settings_get_entry('-last filename-', ''), size=(50, 1), key='-FILENAME-'),
             sg.FileBrowse()],
+            [sg.Text("", background_color="White")],
+            [sg.Text("Choose Your System")],
+            [sg.Radio('Low', "RadioDemo", default=True, size=(10,1), k='-R1-'), sg.Radio('Medium', "RadioDemo", default=True, size=(10,1), k='-R2-'), sg.Radio('High', "RadioDemo", default=True, size=(10,1), k='-R3-')],
+            [sg.Text("", background_color="White")],
             [sg.Button('OPEN'), sg.B('CLEAR')]
             ]
     window = sg.Window('Choose an Excel File', layout, resizable=True, background_color='white')
@@ -481,17 +476,42 @@ while True:
     if event == sg.WIN_CLOSED:
         break
     if event == 'OPEN':
+
+        NUM_EPOCHS = 2
+
+        NUM_BATCHES = 100
+
+        NUM_SEQ = 50
+
         sg.user_settings_set_entry('-filenames-', list(set(sg.user_settings_get_entry('-filenames-', []) + [values['-FILENAME-'], ])))
         sg.user_settings_set_entry('-last filename-', values['-FILENAME-'])
         window['-FILENAME-'].update(values=list(set(sg.user_settings_get_entry('-filenames-', []))))
         file_direct = values['-FILENAME-']
+
+        if values["-R1-"] == True:
+
+            NUM_EPOCHS = 20
+            NUM_BATCHES = 100
+            NUM_SEQ = 50
+
+        elif values["-R2-"] == True:
+            NUM_EPOCHS = 40
+            NUM_BATCHES = 20
+            NUM_SEQ = 70
+
+        elif values["-R3-"] == True:
+            NUM_EPOCHS = 60
+            NUM_BATCHES = 1
+            NUM_SEQ = 100
         break
+
     elif event == 'CLEAR':
         sg.user_settings_set_entry('-filenames-', [])
         sg.user_settings_set_entry('-last filename-', '')
         window['-FILENAME-'].update(values=[], value='')
 
         break
+
 
 # \\  -------- MAKING OF MAIN WINDOW -------- //
 
@@ -608,7 +628,6 @@ _VARS['window'] = sg.Window('TickerWatch',
 # enable event for input boxs upon pressing enter
 _VARS['window']['INPUT_TEXT'].bind("<Return>", "_Enter")
 
-
 _VARS['window']['ADDITIONAL_TICKER'].bind("<Return>", "_Enter")
 
 # \\  -------- PYSIMPLEGUI -------- //
@@ -685,7 +704,6 @@ def updateCycleChart():
     plt.title('CYCLICAL TENDANCY') # adding title from seleected data
     plt.tight_layout() 
     plt.draw()                    # drawing the information on the chart
-
 
 # \\  -------- FORECAST -------- //
 
