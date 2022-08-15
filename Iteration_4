@@ -20,7 +20,7 @@ import math # Mathematical functions
 from datetime import date, timedelta, datetime # Date Functions
 from pandas.plotting import register_matplotlib_converters # This function adds plotting functions for calender dates
 import matplotlib.dates as mdates # Formatting dates
-#from sklearn.metrics import mean_absolute_error, mean_squared_error # Packages for measuring model performance / errors
+from sklearn.metrics import mean_absolute_error, mean_squared_error # Packages for measuring model performance / errors
 from keras.models import Sequential # Deep learning library, used for neural networks
 from keras.layers import LSTM, Dense, Dropout # Deep learning classes for recurrent and regular densely-connected layers
 from keras.callbacks import EarlyStopping # EarlyStopping during model training
@@ -44,15 +44,10 @@ def importData():
     start = dt.datetime(2000, 1, 1)   # start date  
 
     # ticker data to import - used yahoofinance as reference to ticker format
-    #tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
-
-    tickerlist = ['GBPUSD=X', 'EURUSD=X']
+    tickerlist = ['SPY', '^DJI', '^IXIC', 'CL=F', 'GC=F', 'SI=F','NG=F', 'ZW=F', '^TNX', 'ETH-USD', 'BTC-USD', 'XRP-USD', 'DX-Y.NYB', 'EURUSD=X', 'GBPUSD=X', 'JPYUSD=X', 'NZDUSD=X', 'AUDUSD=X', 'CADUSD=X', 'CHFUSD=X']
 
     # pandas datareader
     df = pdr.get_data_yahoo(tickerlist, start, end)
-
-
-
 
     return df
 
@@ -277,13 +272,6 @@ def get_forecast_analysis():
     # creating empty dataframe
     df_forecast = pd.DataFrame(index = dateRange)
 
-    #NUM_EPOCHS = 2
-
-    #NUM_BATCHES = 100
-
-    #NUM_SEQ = 50
-
-
     # \\  -------- START LOOP TO ITER THROUGH DATAFRMAE COLUMNS -------- //
 
 
@@ -315,7 +303,7 @@ def get_forecast_analysis():
             # Convert the data to numpy values
             np_filter_unscaled = np.array(df_filter)
 
-            np_c_unscaled = np.array(df[column_name]).reshape(-1, 1)                            # change from df to df[column_name]
+            np_c_unscaled = np.array(df[column_name]).reshape(-1, 1)                         
     
             return np_filter_unscaled, np_c_unscaled
     
@@ -333,7 +321,7 @@ def get_forecast_analysis():
 
         # \\  -------- SETTING SEQUENCE LENGTHS AND TEST AND TRAIN DATA -------- //
 
-        # Set the input_sequence_length length - this is the timeframe used to make a single prediction - experiment witht his number to find optimal accuracy
+        # Set the input_sequence_length length - this is the timeframe used to make a single prediction
         input_sequence_length = NUM_SEQ
         # The output sequence length is the number of steps that the neural network predicts
         output_sequence_length = 30 #
@@ -395,8 +383,8 @@ def get_forecast_analysis():
 
 
         # Training the model
-        epochs = NUM_EPOCHS # set to 13 for optimal
-        batch_size = NUM_BATCHES # set to 19 as optimal
+        epochs = NUM_EPOCHS # 
+        batch_size = NUM_BATCHES # 
         early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
         history = model.fit(x_train, y_train, 
                             batch_size=batch_size, 
@@ -445,14 +433,13 @@ def get_forecast_analysis():
 
         # putting prediction in dataframe under its column name
         df_forecast[column_name] = y_pred_l
-
-        
-
+ 
     return df_forecast
 
        # \\  -------- MAKING WINDOW TO CHOOSE FORECAST FILE -------- //
 
 # pop up window to input file dirctory for forecast file
+
 def make_directory_wind():
     layout = [[sg.Text('My Window')],
             [sg.Combo(sg.user_settings_get_entry('-filenames-', []), default_value=sg.user_settings_get_entry('-last filename-', ''), size=(50, 1), key='-FILENAME-'),
@@ -467,6 +454,8 @@ def make_directory_wind():
 
     return window
 
+# window logic
+
 while True:
 
     window = make_directory_wind()
@@ -476,6 +465,8 @@ while True:
     if event == sg.WIN_CLOSED:
         break
     if event == 'OPEN':
+
+        # inital variables
 
         NUM_EPOCHS = 2
 
@@ -488,21 +479,23 @@ while True:
         window['-FILENAME-'].update(values=list(set(sg.user_settings_get_entry('-filenames-', []))))
         file_direct = values['-FILENAME-']
 
+        # RNN Variables low, Medium, High
+
         if values["-R1-"] == True:
 
-            NUM_EPOCHS = 20
-            NUM_BATCHES = 100
-            NUM_SEQ = 50
+            NUM_EPOCHS = 2
+            NUM_BATCHES = 80
+            NUM_SEQ = 20
 
         elif values["-R2-"] == True:
-            NUM_EPOCHS = 40
-            NUM_BATCHES = 20
-            NUM_SEQ = 70
+            NUM_EPOCHS = 15
+            NUM_BATCHES = 80
+            NUM_SEQ = 20
 
         elif values["-R3-"] == True:
-            NUM_EPOCHS = 60
-            NUM_BATCHES = 1
-            NUM_SEQ = 100
+            NUM_EPOCHS = 25
+            NUM_BATCHES = 80
+            NUM_SEQ = 20
         break
 
     elif event == 'CLEAR':
@@ -549,9 +542,7 @@ theme_dict = {'BACKGROUND': '#FFFFFF',
                 'PROGRESS': ('#FFFFFF', '#C7D5E0'),
                 'BORDER': 1,'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0}
 
-# sg.theme_add_new('Dashboard', theme_dict)     # if using 4.20.0.1+
-#sg.LOOK_AND_FEEL_TABLE['TICKERWATCH'] = theme_dict
-#sg.theme('TICKERWATCH')
+
 
 # Theme for pyplot
 plt.style.use('fivethirtyeight')
@@ -647,7 +638,7 @@ def drawMainChart():
     data = getData()
     plt.plot(data['EURUSD=X'])
     plt.title('EURUSD=X')
-    plt.tight_layout()                                           # smaller margins around chart in the figure
+    plt.tight_layout()                                       
     _VARS['fig_agg'] = draw_figure(
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
@@ -744,7 +735,7 @@ def updateHistChart():
     data = getData()
     data_ROC = data.pct_change(periods = 1)  # change period number to selected timeframe eventually
 
-    # calculating quantiles
+    # calculating quantiles on histogram
     q_5 = float(data_ROC[assetSelected].quantile(0.5))
     q_75 = float(data_ROC[assetSelected].quantile(0.75))
     q_25 = float(data_ROC[assetSelected].quantile(0.25))
