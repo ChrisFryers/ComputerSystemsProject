@@ -35,8 +35,9 @@ from pandas_datareader import data as pdr
 import yfinance as yfin
 yfin.pdr_override()
 
-# \\  -------- GET DATA -------- //
+# \\  -------- DATA -------- //
 
+# \\  --------IMPORT DATA -------- //
 def importData():
 
     # specify date range for analysis
@@ -54,6 +55,7 @@ def importData():
 # call importData function first on loading (only once) and save in dataframe for getData function to call dataframe
 dataFrame = importData()
 
+# \\  --------GET DATA -------- //
 def getData():
 
     # get data generated from importData()
@@ -79,7 +81,8 @@ def getData():
     #returns dataframe
     return df
 
-# function for correlation Matrix
+# \\  --------GET CORRELATION MATRIX -------- //
+
 def get_Corr_Matrix():
     
     # create layout and window
@@ -126,7 +129,7 @@ def get_Corr_Matrix():
     _VARS['fig_agg_corr'] = draw_figure(
         _VARS['window2']['figCanvas_Corr'].TKCanvas, _VARS['pltFig_corr'])
 
-# function to get list of assets from dataframe
+# \\  --------GET ASSETLIST -------- //
 def getAssetList():
     #get list of assets from dataset
     data = getData()
@@ -141,8 +144,7 @@ assetsList = getAssetList()
 # custom watchlist with user selected tickers
 custom_assetList = []
 
-# \\  -------- SORTING ASSETLIST -------- //
-
+# \\  -------- SORTING ASSETLIST - ALPHA -------- //
 def sort_assetList_AZ():
     
     # using assetsList
@@ -153,10 +155,10 @@ def sort_assetList_AZ():
 
     return assetsList
 
-# sorted assetsLists
+# saving sorted assetlist to variable
 az_assetslist = sort_assetList_AZ()
 
-# sort by last price - high to low
+# \\  -------- SORTING ASSETLIST - PRICE -------- //
 def sort_assetList_Price():
 
     # using assetList
@@ -198,7 +200,7 @@ def sort_assetList_Price():
 price_assetslist = sort_assetList_Price()
 
 
-# sort watch list by 
+# \\  -------- SORTING ASSETLIST - ROC -------- //
 def sort_assetList_ROC():
 
     #get price data
@@ -237,11 +239,11 @@ def sort_assetList_ROC():
 
     return listofprices
 
+# saving sorted watchlist to variable
 ROC_assetslist = sort_assetList_ROC()
 
-# \\  -------- CYCLICAL ANALYSIS -------- //
 
-# function to get cyclcial analysis data
+# \\  -------- CYCLICAL ANALYSIS -------- //
 def get_cyclical_analysis():
     
     # getting the data
@@ -254,7 +256,7 @@ def get_cyclical_analysis():
 
     return asset_cycle
 
-# function to produce forecast prediction
+# \\  -------- FORECAST ANALYSIS -------- //
 def get_forecast_analysis():
 
     # getting the data
@@ -436,11 +438,9 @@ def get_forecast_analysis():
  
     return df_forecast
 
-       # \\  -------- MAKING WINDOW TO CHOOSE FORECAST FILE -------- //
-
-# pop up window to input file dirctory for forecast file
-
+# \\  -------- INITIAL PROGRAM WINDOW -------- //
 def make_directory_wind():
+    # pop up window to input file dirctory for forecast file
     layout = [[sg.Text('My Window')],
             [sg.Combo(sg.user_settings_get_entry('-filenames-', []), default_value=sg.user_settings_get_entry('-last filename-', ''), size=(50, 1), key='-FILENAME-'),
             sg.FileBrowse()],
@@ -547,6 +547,7 @@ theme_dict = {'BACKGROUND': '#FFFFFF',
 # Theme for pyplot
 plt.style.use('fivethirtyeight')
 
+#font themes
 AppFont = ['Bahnschrift Condensed', 12]
 TitleFont = ['Bahnschrift Condensed', 18]
 ListboxFont = ['Bahnschrift Condensed', 15]
@@ -597,14 +598,12 @@ block_4 = [
 
 
 # \\  -------- LAYOUT -------- //
-
 layout = [[sg.Column(top, expand_x = True, background_color='white')],
           [sg.Column(block_1, expand_x = True, background_color='white'), sg.Column(block_3, background_color='white')],
           [sg.Column(block_2, expand_x = True, background_color='white'), sg.Column(block_4, expand_x = True, background_color='white')]
          ]
 
 # \\  -------- APPLICATION WINDOW  -------- //
-
 _VARS['window'] = sg.Window('TickerWatch',
                             layout,
                             size = (1000, 500),
@@ -624,15 +623,13 @@ _VARS['window']['ADDITIONAL_TICKER'].bind("<Return>", "_Enter")
 # \\  -------- PYSIMPLEGUI -------- //
 
 # \\  -------- PYPLOTS -------- //
-
 def draw_figure(canvas, figure):
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=5)
     return figure_canvas_agg
 
-# \\  -------- MAIN -------- //
-
+# \\  -------- DRAW MAIN CHART-------- //
 def drawMainChart():
     _VARS['pltFig'] = plt.figure(num = 1)
     data = getData()
@@ -642,6 +639,7 @@ def drawMainChart():
     _VARS['fig_agg'] = draw_figure(
         _VARS['window']['figCanvas'].TKCanvas, _VARS['pltFig'])
 
+# \\  -------- UPDATE MAIN CHART-------- //
 def updateMainChart():
 
     #getting data to display
@@ -655,7 +653,7 @@ def updateMainChart():
     plt.tight_layout()       # adding title from seleected data
     plt.draw()                    # drawing the information on the chart
 
-# update main chart with additional ticker symbol
+# \\  -------- UPDATE MAIN CHART WITH ADDITIONAL TICKER -------- //
 def updateMainChartAdd():
 
     #getting data to display
@@ -672,7 +670,7 @@ def updateMainChartAdd():
 
 # \\  -------- CYCLICAL -------- //
 
-# draw cycle chart function
+# \\  -------- DRAW CYCLICAL CHART-------- //
 def drawCycleChart():
     _VARS['pltFig_cycle'] = plt.figure(num = 2, figsize =(5.75, 6), dpi = 80)
     data = getData()
@@ -682,7 +680,7 @@ def drawCycleChart():
     _VARS['fig_agg_cycle'] = draw_figure(
         _VARS['window']['figCanvas_Cycle'].TKCanvas, _VARS['pltFig_cycle'])
 
-# update cycle chart function
+# \\  -------- UPDATE CYCLICAL CHART-------- //
 def updateCycleChart():
 
     #getting data to display
@@ -698,7 +696,7 @@ def updateCycleChart():
 
 # \\  -------- FORECAST -------- //
 
-# draw chart function
+# \\  -------- DRAW FORECAST CHART-------- //
 def drawForecastChart():
     _VARS['pltFig_forecast'] = plt.figure(num = 3, figsize =(5.75, 6), dpi = 80)
     data = getData()
@@ -708,7 +706,7 @@ def drawForecastChart():
     _VARS['fig_agg_forecast'] = draw_figure(
         _VARS['window']['figCanvas_Forecast'].TKCanvas, _VARS['pltFig_forecast'])
 
-# update chart function
+# \\  -------- UPDATE FORECAST CHART-------- //
 def updateForecastChart(): 
 
     plt.figure(num = 3)                  # tell the program we selecting figure 2 to update
@@ -720,6 +718,7 @@ def updateForecastChart():
 
 # \\  -------- HISTOGRAM -------- //
 
+# \\  -------- DRAW HISTOGRAM CHART -------- //
 def drawHistChart():
     _VARS['pltFig_hist'] = plt.figure(num = 5, figsize =(5.75, 6), dpi = 80)
     data = getData()
@@ -730,6 +729,7 @@ def drawHistChart():
     _VARS['fig_agg_hist'] = draw_figure(
         _VARS['window']['figCanvas_Hist'].TKCanvas, _VARS['pltFig_hist'])
 
+# \\  -------- UPDATE HISTOGRAM CHART -------- //
 def updateHistChart(): 
 
     data = getData()
@@ -751,7 +751,7 @@ def updateHistChart():
     plt.draw()  
 
 # \\  -------- RATE OF CHANGE -------- //
-
+# \\  -------- DRAW RATE OF CHANGE CHART -------- //
 def drawRocChart():
     _VARS['pltFig_roc'] = plt.figure(num = 6, figsize =(5.75, 6), dpi = 80)
     data = getData()
@@ -762,6 +762,7 @@ def drawRocChart():
     _VARS['fig_agg_roc'] = draw_figure(
         _VARS['window']['figCanvas_Roc'].TKCanvas, _VARS['pltFig_roc'])
 
+# \\  -------- UPDATE RATE OF CHANGE CHART -------- //
 def updateRocChart(): 
 
     data = getData()
@@ -826,7 +827,7 @@ def updateDistCharts():
     plt.draw()                    # drawing the information on the chart 
 
 
-# \\  -------- PYPLOT -------- //
+# \\  -------- CALLING PYPLOT DRAW CHART FUNCTIONS -------- //
 drawCycleChart()
 drawMainChart()
 drawHistChart()
@@ -837,7 +838,7 @@ drawRocChart()
 # as we have daily data we dont need to forecast more than once per day. this section checks a csv file for forecasts 30 days from todays date.
 # if they are found we dont need to generate new forecsats, we just import them from the csv
 
-try: 
+try:
 
     # try reading in the dataframe - later change this to an option the user can decide
     forecast = pd.read_csv(file_direct, index_col = 0)
@@ -902,7 +903,7 @@ except:
 drawForecastChart()
 
 
-# \\  -------- MAIN LOOP -------- //
+# \\  -------- MAIN APPLICATION LOOP -------- //
 while True:
      
     event, value = _VARS['window'].read(timeout=200)
